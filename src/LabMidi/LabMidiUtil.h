@@ -44,6 +44,17 @@ namespace Lab {
     const char* instrumentGroupName(uint8_t instrument);      // 0 based
     const char* instrumentName(uint8_t instrument);           // 0 based
     const char* percussionName(uint8_t channel10noteNumber);  // 0 based
+
+    // Convert a note name to a MIDI note number
+    //
+    // name has the form nmo, and does not need to be null terminated.
+    // where n is note name in upper or lower case (a-g)
+    //       m is modifier - b for flat # for sharp
+    //       o is octave from -1 to 9
+    //
+    // len is the number of characters consumed by the note name
+    uint8_t     noteNameToNoteNum(char const*const name);
+    uint8_t     noteNameToNoteNum(char const*const name, int& len);
     
 } // Lab
     
