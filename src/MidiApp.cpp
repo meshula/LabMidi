@@ -215,8 +215,13 @@ public:
     {
         std::cout << "Compare to the table on http://soundprogramming.net/file_formats/midi_note_frequencies" << std::endl;
         std::cout << "--------------------------------------------------------------------------------------" << std::endl;
-        for (uint8_t i = 0; i <= 127; ++i)
-            std::cout << (int) i << " " << Lab::noteName(i) << " " << Lab::noteToFrequency(i) << std::endl;
+        for (uint8_t i = 0; i <= 127; ++i) {
+            float f = Lab::noteToFrequency(i);
+            int fi = Lab::frequencyToNote(f);
+            std::cout << (int) i << " (" << fi << ") " << Lab::noteName(i)
+                      << " " << f
+                      << std::endl;
+        }
     }
     
     virtual void update(float) { }

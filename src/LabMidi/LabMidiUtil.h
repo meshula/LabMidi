@@ -94,5 +94,13 @@ namespace Lab {
     float noteToFrequency(uint8_t note);
     float noteToFrequency(uint8_t, float A);
     
+    // Convert a frequency to a note number
+    //
+    // The default value for A is 440.0. A different tuning value
+    // can be provided.
+    //
+    uint8_t frequencyToNote(float freq);
+    uint8_t frequencyToNote(float freq, float A);
+    
 } // Lab
     

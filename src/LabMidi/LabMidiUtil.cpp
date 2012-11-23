@@ -405,6 +405,20 @@ namespace Lab {
     {
         return noteToFrequency(note, 440.0f);
     }
+    
+    uint8_t frequencyToNote(float freq, float A)
+    {
+        float n = freq / (A / 32.0f);
+        n = logf(n) / logf(2.0f);
+        n *= 12.0f;
+        n += 9;
+        return (uint8_t) n;
+    }
+
+    uint8_t frequencyToNote(float freq)
+    {
+        return frequencyToNote(freq, 440.0f);
+    }
 
     
 } // Lab
