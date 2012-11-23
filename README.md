@@ -14,4 +14,4 @@ Like ofxMidi, I'm thinking of using PGMidi <https://github.com/petegoodliffe/PGM
 
 See the MidiApp source for examples of usage. Note that MidiApp.cpp currently has hard coded paths to the midi sample files. You'll probably need to adjust those.
 
-Tested on OSX. Implementation for Windows in place, but not tested. premake file needs to be set up for multiple platforms. Pull requests welcome.
+Tested on OSX. Implementation for Windows and Linux in place, but not tested. premake file needs to be set up for multiple platforms. Pull requests welcome.
