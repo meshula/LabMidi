@@ -31,103 +31,307 @@
  */
 
 #include "LabMidiUtil.h"
-#include "RtMidi.h"
 
 namespace Lab {
     
-    class MidiUtil::Detail
-    {
-    public:
-        Detail()
-        : inProbe(new RtMidiIn())
-        , outProbe(new RtMidiOut())
-        {
-            refreshPortList();
-        }
-        
-        ~Detail()
-        {
-            delete inProbe;
-            delete outProbe;
-        }
-        
-        void refreshPortList()
-        {
-            inPorts = inProbe->getPortCount();
-            inPortNames.clear();
-            for (unsigned int i = 0; i < inPorts; ++i)
-                inPortNames.push_back(inProbe->getPortName(i));
-            
-            outPorts = outProbe->getPortCount();
-            outPortNames.clear();
-            for (unsigned int i = 0; i < outPorts; ++i)
-                outPortNames.push_back(outProbe->getPortName(i));
-        }
-        
-        RtMidiIn* inProbe;
-        RtMidiOut* outProbe;
-        unsigned int inPorts;
-        unsigned int outPorts;
-        std::vector<std::string> inPortNames;
-        std::vector<std::string> outPortNames;
+    const char* commandNames[128] = {
+        // 0x80
+        "Note off: 1", "Note off: 2", "Note off: 3", "Note off: 4", "Note off: 5", "Note off: 6", "Note off: 7", "Note off: 8",
+        "Note off: 9", "Note off: 10", "Note off: 11", "Note off: 12", "Note off: 13", "Note off: 14", "Note off: 15", "Note off: 16",
+        // 0x90
+        "Note on: 1", "Note on: 2", "Note on: 3", "Note on: 4", "Note on: 5", "Note on: 6", "Note on: 7", "Note on: 8",
+        "Note on: 9", "Note on: 10", "Note on: 11", "Note on: 12", "Note on: 13", "Note on: 14", "Note on: 15", "Note on: 16",
+        // 0xA0
+        "Poly Pressure: 1", "Poly Pressure: 2", "Poly Pressure: 3", "Poly Pressure: 4", "Poly Pressure: 5", "Poly Pressure: 6", "Poly Pressure: 7", "Poly Pressure: 8",
+        "Poly Pressure: 9", "Poly Pressure: 10", "Poly Pressure: 11", "Poly Pressure: 12", "Poly Pressure: 13", "Poly Pressure: 14", "Poly Pressure: 15", "Poly Pressure: 16",
+        // 0xB0
+        "Control Change: 1", "Control Change: 2", "Control Change: 3", "Control Change: 4", "Control Change: 5", "Control Change: 6", "Control Change: 7", "Control Change: 8",
+        "Control Change: 9", "Control Change: 10", "Control Change: 11", "Control Change: 12", "Control Change: 13", "Control Change: 14", "Control Change: 15", "Control Change: 16",
+        // 0xC0
+        "Program Change: 1", "Program Change: 2", "Program Change: 3", "Program Change: 4", "Program Change: 5", "Program Change: 6", "Program Change: 7", "Program Change: 8",
+        "Program Change: 9", "Program Change: 10", "Program Change: 11", "Program Change: 12", "Program Change: 13", "Program Change: 14", "Program Change: 15", "Program Change: 16",
+        // 0xD0
+        "Channel Pressure: 1", "Channel Pressure: 2", "Channel Pressure: 3", "Channel Pressure: 4", "Channel Pressure: 5", "Channel Pressure: 6", "Channel Pressure: 7", "Channel Pressure: 8",
+        "Channel Pressure: 9", "Channel Pressure: 10", "Channel Pressure: 11", "Channel Pressure: 12", "Channel Pressure: 13", "Channel Pressure: 14", "Channel Pressure: 15", "Channel Pressure: 16",
+        // 0xE0
+        "Pitch Bend: 1", "Pitch Bend: 2", "Pitch Bend: 3", "Pitch Bend: 4", "Pitch Bend: 5", "Pitch Bend: 6", "Pitch Bend: 7", "Pitch Bend: 8",
+        "Pitch Bend: 9", "Pitch Bend: 10", "Pitch Bend: 11", "Pitch Bend: 12", "Pitch Bend: 13", "Pitch Bend: 14", "Pitch Bend: 15", "Pitch Bend: 16",
+        // 0xF0 System Commands
+        "System Exclusive",
+        "Time Code",
+        "Song Position Pointer",
+        "Song Select",
+        "Reserved 1", "Reserved 2",
+        "Tune Request",
+        "EOX",
+        // 0xF8 System Realtime
+        "Time Clock",
+        "Reserved 3",
+        "Start",
+        "Continue",
+        "Stop",
+        "Reserved 4",
+        "Active Sensing",
+        "System Reset"
     };
     
-    MidiUtil::MidiUtil()
-    : _detail(new Detail())
+    const char* commandName(uint8_t command)
     {
+        if (command < 0x80)
+            return "Unknown";
+        
+        return commandNames[command - 0x80];
     }
     
-    MidiUtil::~MidiUtil()
+    const char* noteNames[128] = {
+        "C0", "C0#", "D0", "D0#", "E0", "F0", "F0#", "G0", "G0#", "A0", "A0#", "B0",
+        "C1", "C1#", "D1", "D1#", "E1", "F1", "F1#", "G1", "G1#", "A1", "A1#", "B1",
+        "C2", "C2#", "D2", "D2#", "E2", "F2", "F2#", "G2", "G2#", "A2", "A2#", "B2",
+        "C3", "C3#", "D3", "D3#", "E3", "F3", "F3#", "G3", "G3#", "A3", "A3#", "B3",
+        "C4", "C4#", "D4", "D4#", "E4", "F4", "F4#", "G4", "G4#", "A4", "A4#", "B4",
+        "C5", "C5#", "D5", "D5#", "E5", "F5", "F5#", "G5", "G5#", "A5", "A5#", "B5",
+        "C6", "C6#", "D6", "D6#", "E6", "F6", "F6#", "G6", "G6#", "A6", "A6#", "B6",
+        "C7", "C7#", "D7", "D7#", "E7", "F7", "F7#", "G7", "G7#", "A7", "A7#", "B7",
+        "C8", "C8#", "D8", "D8#", "E8", "F8", "F8#", "G8", "G8#", "A8", "A8#", "B8",
+        "C9", "C9#", "D9", "D9#", "E9", "F9", "F9#", "G9", "G9#", "A9", "A9#", "B9",
+        "C10", "C10#", "D10", "D10#", "E10", "F10", "F10#", "G10"
+    };
+    
+    const char* noteName(uint8_t note)
     {
-        delete _detail;
+        return noteNames[note & 0x7f];
     }
     
-    void MidiUtil::refreshPortList()
+    const char* noteName(uint8_t note, uint8_t channel)
     {
-        _detail->refreshPortList();
+        if (channel == 9)  // MIDI channel 10
+            return percussionName(note);
+        else
+            return noteNames[note & 0x7f];
     }
 
-    unsigned int MidiUtil::inPorts() const
+    const char* groupNames[16] = {
+        "Piano",        "Chromatic Percussion", "Organ",      "Guitar",
+        "Bass",         "Strings",              "Ensemble",   "Brass",
+        "Reed",         "Pipe",                 "Syth Lead",  "Synth Pad",
+        "Syth Effects", "Ethnic",               "Percussive", "Sound Effects"
+    };
+    
+    const char* instrumentGroupName(uint8_t instrument)
     {
-        return _detail->inPorts;
+        return groupNames[(instrument) >> 4];
     }
     
-    unsigned int MidiUtil::outPorts() const
+    const char* instrumentNames[128] = {
+        "Acoustic Grand Piano",         // 1
+        "Bright Acoustic Piano",
+        "Electric Grand Piano",
+        "Honky-tonk Piano",
+        "Electric Piano 1",
+        "Electric Piano 2",
+        "Harpsichord",
+        "Clavichord",
+        
+        "Celesta",                      // 9
+        "Glockenspiel",
+        "Music Box",
+        "Vibraphone",
+        "Marimba",
+        "Xylophone",
+        "Tubular Bells",
+        "Dulcimer",
+        
+        "Drawbar Organ",               // 17
+        "Percussive Organ",
+        "Rock Organ",
+        "Church Organ",
+        "Reed Organ",
+        "Accordion",
+        "Harmonica",
+        "Tango Accordion",
+        
+        "Acoustic Guitar (nylon)",     // 25
+        "Acoustic Guitar (steel)",
+        "Electric Guitar (jazz)",
+        "Electric Guitar (clean)",
+        "Electric Guitar (muted)",
+        "Overdriven Guitar",
+        "Distortion Guitar",
+        "Guitar harmonics",
+        
+        "Acoustic Bass",               // 33
+        "Electric Bass (finger)",
+        "Electric Bass (pick)",
+        "Fretless Bass",
+        "Slap Bass 1",
+        "Slap Bass 2",
+        "Synth Bass 1",
+        "Synth Bass 2",
+        
+        "Violin",                     // 41
+        "Viola",
+        "Cello",
+        "Contrabass",
+        "Tremolo Strings",
+        "Pizzicato Strings",
+        "Orchestral Harp",
+        "Timpani",
+        
+        "String Ensemble 1",          // 49
+        "String Ensemble 2",
+        "Synth Strings 1",
+        "Synth Strings 2",
+        "Choir Aahs",
+        "Voice Oohs",
+        "Synth Voice",
+        "Orchestra Hit",
+        
+        "Trumpet",                    // 57
+        "Trombone",
+        "Tuba",
+        "Muted Trumpet",
+        "French Horn",
+        "Brass Section",
+        "Synth Brass 1",
+        "Synth Brass 2",
+        
+        "Soprano Sax",                // 65
+        "Alto Sax",
+        "Tenor Sax",
+        "Baritone Sax",
+        "Oboe",
+        "English Horn",
+        "Bassoon",
+        "Clarinet",
+        
+        "Piccolo",                    // 73
+        "Flute",
+        "Recorder",
+        "Pan Flute",
+        "Blown Bottle",
+        "Shakuhachi",
+        "Whistle",
+        "Ocarina",
+        
+        "Lead 1 (square)",            // 81
+        "Lead 2 (sawtooth)",
+        "Lead 3 (calliope)",
+        "Lead 4 (chiff)",
+        "Lead 5 (charang)",
+        "Lead 6 (voice)",
+        "Lead 7 (fifths)",
+        "Lead 8 (bass + lead)",
+        
+        "Pad 1 (new age)",            // 89
+        "Pad 2 (warm)",
+        "Pad 3 (polysynth)",
+        "Pad 4 (choir)",
+        "Pad 5 (bowed)",
+        "Pad 6 (metallic)",
+        "Pad 7 (halo)",
+        "Pad 8 (sweep)",
+        
+        "FX 1 (rain)",                // 97
+        "FX 2 (soundtrack)",
+        "FX 3 (crystal)",
+        "FX 4 (atmosphere)",
+        "FX 5 (brightness)",
+        "FX 6 (goblins)",
+        "FX 7 (echoes)",
+        "FX 8 (sci-fi)",
+        
+        "Sitar",                      // 105
+        "Banjo",
+        "Shamisen",
+        "Koto",
+        "Kalimba",
+        "Bag pipe",
+        "Fiddle",
+        "Shanai",
+        
+        "Tinkle Bell",                // 113
+        "Agogo",
+        "Steel Drums",
+        "Woodblock",
+        "Taiko Drum",
+        "Melodic Tom",
+        "Synth Drum",
+        "Reverse Cymbal",
+        
+        "Guitar Fret Noise",          // 121
+        "Breath Noise",
+        "Seashore",
+        "Bird Tweet",
+        "Telephone Ring",
+        "Helicopter",
+        "Applause",
+        "Gunshot"
+    };
+    
+    const char* instrumentName(uint8_t instrument)
     {
-        return _detail->outPorts;
+        return instrumentNames[instrument];
+    }
+    
+    const char* percussionNames[47] = {
+        "Acoustic Bass Drum",
+        "Bass Drum 1",
+        "Side Stick",
+        "Acoustic Snare",
+        "Hand Clap",
+        "Electric Snare",
+        "Low Floor Tom",
+        "Closed Hi-hat",
+        "Low Floor Tom",
+        "Pedal Hi-hat",
+        "Low Tom",
+        "Open High Hat",
+        "Mid Low Tom",
+        "High Mid Tom",
+        "Crash Cymbal",
+        "High Tom",
+        "Ride Cymbal 1",
+        "Chinese Cymbal",
+        "Ride Bell",
+        "Tambourine",
+        "Splash Cymbal",
+        "Cowbell",
+        "Crash Cymbal 2",
+        "Vibra Slap",
+        "Ride Cymbal 2",
+        "High Bongo",
+        "Low Bongo",
+        "Mute High Conga",
+        "Open High Conga",
+        "Low Conga",
+        "High Timbale",
+        "Low Timbale",
+        "High Agogo",
+        "Low Agogo",
+        "Cabasa",
+        "Maracas",
+        "Short Whistle",
+        "Long Whistle",
+        "Short Guiro",
+        "Long Guiro",
+        "Claves",
+        "High Wood Block",
+        "Low Wood Block",
+        "Mute Cuica",
+        "Open Cuica",
+        "Mute Triangle",
+        "Open Triangle"
+    };
+    
+    const char* percussionName(uint8_t channel10noteNumber)
+    {
+        uint8_t note = channel10noteNumber & 0x7f;
+        
+        if (note < 35 || note > 81)
+            return "Unknown";
+        
+        return percussionNames[note - 35];
     }
 
-    const std::string& MidiUtil::inPort(int i) const
-    {
-        static std::string emptyString;
-        if (i < 0 || i >= _detail->inPortNames.size())
-            return emptyString;
-        return _detail->inPortNames[i];
-    }
-    
-    const std::string& MidiUtil::outPort(int i) const
-    {
-        static std::string emptyString;
-        if (i < 0 || i >= _detail->outPortNames.size())
-            return emptyString;
-        return _detail->outPortNames[i];
-    }
-    
-    char const*const MidiUtil::inPortCStr(int i) const
-    {
-        static const char emptyString[1] = {'\0'};
-        if (i < 0 || i >= _detail->inPortNames.size())
-            return emptyString;
-        return _detail->inPortNames[i].c_str();
-    }
-    
-    char const*const MidiUtil::outPortCStr(int i) const
-    {
-        static const char emptyString[1] = {'\0'};
-        if (i < 0 || i >= _detail->outPortNames.size())
-            return emptyString;
-        return _detail->outPortNames[i].c_str();
-    }
-    
     
 } // Lab

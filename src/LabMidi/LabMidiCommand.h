@@ -98,8 +98,5 @@ namespace Lab {
         uint8_t byte2;
    };
     
-    const char* commandName(uint8_t command);
-    const char* noteName(uint8_t note);
-    
 } // Lab
     

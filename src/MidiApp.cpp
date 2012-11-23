@@ -39,6 +39,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "LabMidiCommand.h"
 #include "LabMidiIn.h"
 #include "LabMidiOut.h"
+#include "LabMidiPorts.h"
 #include "LabMidiSoftSynth.h"
 #include "LabMidiSong.h"
 #include "LabMidiSongPlayer.h"
@@ -158,22 +159,27 @@ class TestSoftSynth : public TestMidi
 public:
     TestSoftSynth()
     : midiSoftSynth(new Lab::MidiSoftSynth())
+    , midiSong(0)
+    , midiSongPlayer(0)
     {
         midiSoftSynth->initialize(1, 0);
         
         FILE* f = fopen("resources/rachmaninov3.mid", "rb");
-        fseek(f, 0, SEEK_END);
-        int l = ftell(f);
-        fseek(f, 0, SEEK_SET);
-        uint8_t* a = new uint8_t[l];
-        fread(a, 1, l, f);
-        fclose(f);
-        
-        midiSong = new Lab::MidiSong();
-        midiSong->parse(a, l, true);
-        midiSongPlayer = new Lab::MidiSongPlayer(midiSong, midiSoftSynth);
-        midiSongPlayer->play(0);
-        delete [] a;
+        if (f)
+        {
+            fseek(f, 0, SEEK_END);
+            int l = ftell(f);
+            fseek(f, 0, SEEK_SET);
+            uint8_t* a = new uint8_t[l];
+            fread(a, 1, l, f);
+            fclose(f);
+            
+            midiSong = new Lab::MidiSong();
+            midiSong->parse(a, l, true);
+            midiSongPlayer = new Lab::MidiSongPlayer(midiSong, midiSoftSynth);
+            midiSongPlayer->play(0);
+            delete [] a;
+        }
     }
     
     virtual ~TestSoftSynth()
@@ -185,11 +191,15 @@ public:
     
     virtual void update(float t)
     {
-        midiSongPlayer->update(t);
+        if (midiSongPlayer)
+            midiSongPlayer->update(t);
     }
     
     virtual bool running(float t)
     {
+        if (!midiSongPlayer)
+            return false;
+        
         return t <= (midiSongPlayer->length() + 0.5f);
     }
     
@@ -205,40 +215,40 @@ class MidiApp::Detail
 {
 public:
     Detail()
-    : midiUtil(new Lab::MidiUtil)
+    : midiPorts(new Lab::MidiPorts())
     {
     }
     
     ~Detail()
     {
-        delete midiUtil;
+        delete midiPorts;
     }
     
     void listPorts()
     {
-        midiUtil->refreshPortList();
-        int c = midiUtil->inPorts();
+        midiPorts->refreshPortList();
+        int c = midiPorts->inPorts();
         if (c == 0)
             std::cout << "No MIDI input ports found" << std::endl;
         else {
             std::cout << "MIDI input ports:" << std::endl;
             for (int i = 0; i < c; ++i)
-                std::cout << "   " << i << ": " << midiUtil->inPort(i) << std::endl;
+                std::cout << "   " << i << ": " << midiPorts->inPort(i) << std::endl;
             std::cout << std::endl;
         }
         
-        c = midiUtil->outPorts();
+        c = midiPorts->outPorts();
         if (c == 0)
             std::cout << "No MIDI output ports found" << std::endl;
         else {
             std::cout << "MIDI output ports:" << std::endl;
             for (int i = 0; i < c; ++i)
-                std::cout << "   " << i << ": " << midiUtil->outPort(i) << std::endl;
+                std::cout << "   " << i << ": " << midiPorts->outPort(i) << std::endl;
             std::cout << std::endl;
         }
     }
 
-    Lab::MidiUtil* midiUtil;
+    Lab::MidiPorts* midiPorts;
     double startTime;
     
     TestMidi* testMidi;

@@ -1,5 +1,5 @@
 //
-//  LabMidiUtil.h
+//  LabMidiPorts.h
 //
 //  CoreAudio, CoreMidi, and CoreFoundation frameworks are required on OSX/iOS
 //
@@ -34,16 +34,30 @@
 
 #pragma once
 
-#include <stdint.h>
+#include <string>
 
 namespace Lab {
     
-    const char* commandName(uint8_t command);
-    const char* noteName(uint8_t note);
-    const char* noteName(uint8_t note, uint8_t channel);      // percussion is on channel 10
-    const char* instrumentGroupName(uint8_t instrument);      // 0 based
-    const char* instrumentName(uint8_t instrument);           // 0 based
-    const char* percussionName(uint8_t channel10noteNumber);  // 0 based
+    class MidiPorts
+    {
+    public:
+        MidiPorts();
+        ~MidiPorts();
+        
+    public:
+        // Manage a list of ports
+        void refreshPortList();
+        unsigned int inPorts() const;
+        unsigned int outPorts() const;
+        const std::string& inPort(int i) const;
+        const std::string& outPort(int i) const;
+        char const*const inPortCStr(int i) const;
+        char const*const outPortCStr(int i) const;
+        
+    private:
+        class Detail;
+        Detail* _detail;
+    };
     
 } // Lab
     

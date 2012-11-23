@@ -12,6 +12,7 @@ LabMidi is quite different from either of those because the focus is playing mid
 
 Like ofxMidi, I'm thinking of using PGMidi <https://github.com/petegoodliffe/PGMidi> to implement the API on iOS.
 
-See the MidiApp source for examples of usage. Note that MidiApp.cpp currently has hard coded paths to the midi sample files. You'll probably need to adjust those.
+See the MidiApp source for examples of usage. Note that MidiApp.cpp currently has hard coded paths to the midi sample files. 
+You'll need to make sure you've set your working directory to the folder containing the resources folder. In XCode, under the Product menu, select Edit Schemes..., then the Options tab, then the target you want to run, and click the Use Custom Working Directory box. Fill in the path appropriately.
 
 Tested on OSX. Implementation for Windows and Linux in place, but not tested. premake file needs to be set up for multiple platforms. Pull requests welcome.

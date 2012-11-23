@@ -365,7 +365,7 @@ namespace Lab {
         
         startingTempo = 120.0f;
         ticksPerBeat = float(timeDivision); // ticks per beat (a beat is defined as a quarter note)
-                                                  // commonly 48 to 960.
+                                            // commonly 48 to 960.
         
         try {
             for (int i = 0; i < trackCount; ++i) {
