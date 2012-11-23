@@ -105,7 +105,7 @@ public:
         midiSoftSynth->initialize(1, 0);
         
         midiSong = new Lab::MidiSong();
-        midiSong->parse("/Users/dp/Code/MidiApp/resources/minute_waltz.mid", true);
+        midiSong->parse("resources/minute_waltz.mid", true);
         midiSongPlayer = new Lab::MidiSongPlayer(midiSong, midiOut);
         midiSongPlayer->play(0);
     }
@@ -161,7 +161,7 @@ public:
     {
         midiSoftSynth->initialize(1, 0);
         
-        FILE* f = fopen("/Users/dp/Code/MidiApp/resources/rachmaninov3.mid", "rb");
+        FILE* f = fopen("resources/rachmaninov3.mid", "rb");
         fseek(f, 0, SEEK_END);
         int l = ftell(f);
         fseek(f, 0, SEEK_SET);
