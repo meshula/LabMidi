@@ -208,7 +208,20 @@ public:
     Lab::MidiSongPlayer* midiSongPlayer;
 };
 
-
+class TestFrequencyCalc : public TestMidi
+{
+public:
+    TestFrequencyCalc()
+    {
+        std::cout << "Compare to the table on http://soundprogramming.net/file_formats/midi_note_frequencies" << std::endl;
+        std::cout << "--------------------------------------------------------------------------------------" << std::endl;
+        for (uint8_t i = 0; i <= 127; ++i)
+            std::cout << (int) i << " " << Lab::noteName(i) << " " << Lab::noteToFrequency(i) << std::endl;
+    }
+    
+    virtual void update(float) { }
+    virtual bool running(float) { return false; }
+};
 
 
 class MidiApp::Detail
@@ -257,12 +270,13 @@ public:
 MidiApp::MidiApp()
 : _detail(new Detail())
 {
-#define TEST_SOFTSYNTH
-#ifdef TEST_SOFTSYNTH
-    _detail->testMidi = new TestSoftSynth();
-#else
-    _detail->testMidi = new TestInOut();
-#endif
+#define TEST 2
+    switch (TEST) {
+        case 0: _detail->testMidi = new TestSoftSynth();     break;
+        case 1: _detail->testMidi = new TestInOut();         break;
+        case 2: _detail->testMidi = new TestFrequencyCalc(); break;
+    }
+    
     _detail->startTime = getElapsedSeconds();
     _detail->listPorts();
 }

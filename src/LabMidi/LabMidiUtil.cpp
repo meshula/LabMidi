@@ -33,6 +33,7 @@
 #include "LabMidiUtil.h"
 
 #include <ctype.h>
+#include <math.h>
 #include <string.h>
 
 namespace Lab {
@@ -393,6 +394,16 @@ namespace Lab {
             return "Unknown";
         
         return percussionNames[note - 35];
+    }
+    
+    float noteToFrequency(uint8_t note, float A)
+    {
+        return (A / 32.0f) * powf(2.0f, (note - 9) / 12.0f);
+    }
+
+    float noteToFrequency(uint8_t note)
+    {
+        return noteToFrequency(note, 440.0f);
     }
 
     

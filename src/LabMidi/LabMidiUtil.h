@@ -37,13 +37,38 @@
 #include <stdint.h>
 
 namespace Lab {
-    
+
+    // Convert a MIDI command byte into a descriptive string
+    //
     const char* commandName(uint8_t command);
+
+    // Convert an instrument number, 0 based, into a group name. The names
+    // correspond to those in the General MIDI specification.
+    //
+    const char* instrumentGroupName(uint8_t instrument);
+    
+    // Convert an instrument number, 0 based, into a name. The names
+    // correspond to those in the General MIDI specification.
+    //
+    const char* instrumentName(uint8_t instrument);
+    
+    // Convert a channel 10 note number into a percussive instrument name.
+    // The names correspond to those in the General MIDI specification.
+    //
+    const char* percussionName(uint8_t channel10noteNumber);
+
+    // Convert a MIDI note to a name in standard format.
+    // The result can be round tripped through noteNameToNoteNum.
+    //
     const char* noteName(uint8_t note);
-    const char* noteName(uint8_t note, uint8_t channel);      // percussion is on channel 10
-    const char* instrumentGroupName(uint8_t instrument);      // 0 based
-    const char* instrumentName(uint8_t instrument);           // 0 based
-    const char* percussionName(uint8_t channel10noteNumber);  // 0 based
+    
+    // Convert a MIDI note to a name in standard format, unless the note
+    // is on channel 10. On Channel 10, the name of the percussive instrument
+    // will be returned.
+    //
+    // The result cannot be round tripped through noteNameToNoteNum.
+    //
+    const char* noteName(uint8_t note, uint8_t channel);
 
     // Convert a note name to a MIDI note number
     //
@@ -53,8 +78,21 @@ namespace Lab {
     //       o is octave from -1 to 9
     //
     // len is the number of characters consumed by the note name
-    uint8_t     noteNameToNoteNum(char const*const name);
-    uint8_t     noteNameToNoteNum(char const*const name, int& len);
+    //
+    // If the note number cannot be converted, 0xff is returned.
+    // Does not convert percussion names from channel 10, so 0xff will be
+    // returned in that case.
+    //
+    uint8_t noteNameToNoteNum(char const*const name);
+    uint8_t noteNameToNoteNum(char const*const name, int& len);
+
+    // Convert a note number to frequency
+    //
+    // The default value for A is 440.0. A different tuning value
+    // can be provided.
+    //
+    float noteToFrequency(uint8_t note);
+    float noteToFrequency(uint8_t, float A);
     
 } // Lab
     
