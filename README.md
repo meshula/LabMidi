@@ -14,7 +14,9 @@ Cross platform MIDI related utilities.
     only implemented for OSX (and presumably it would work for iOS as well).
     
     class MidiSong
-    A song is a collection of tracks, which are a list of MIDI events
+    A song is a collection of tracks, which are a list of MIDI events. A song can
+    be parsed from a Standard MIDI file, or from a base64 encoded Standard MIDI file
+    with an appropriate header.
     
     class MidiSongPlayer
     Can play a single MidiSong. The class is initialized with a pointer
