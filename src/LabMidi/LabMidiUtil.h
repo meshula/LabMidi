@@ -102,5 +102,9 @@ namespace Lab {
     uint8_t frequencyToNote(float freq);
     uint8_t frequencyToNote(float freq, float A);
     
+    // Convert a bpm value to a named tempo such as Largo
+    //
+    char const*const bpmToTempoName(int bpm);
+    
 } // Lab
     

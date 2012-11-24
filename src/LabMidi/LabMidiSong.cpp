@@ -64,6 +64,46 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+// The Base64 decoder is based on
+//  http://base64.sourceforge.net/b64.c
+// It carries the copyright notice:
+/*
+ MODULE NAME:    b64.c
+ 
+ AUTHOR:         Bob Trower 08/04/01
+ 
+ PROJECT:        Crypt Data Packaging
+ 
+ COPYRIGHT:      Copyright (c) Trantor Standard Systems Inc., 2001
+ 
+ NOTE:           This source code may be used as you wish, subject to
+ the MIT license.  See the LICENCE section below.
+ 
+ LICENCE:        Copyright (c) 2001 Bob Trower, Trantor Standard Systems Inc.
+ 
+ Permission is hereby granted, free of charge, to any person
+ obtaining a copy of this software and associated
+ documentation files (the "Software"), to deal in the
+ Software without restriction, including without limitation
+ the rights to use, copy, modify, merge, publish, distribute,
+ sublicense, and/or sell copies of the Software, and to
+ permit persons to whom the Software is furnished to do so,
+ subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall
+ be included in all copies or substantial portions of the
+ Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+ KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+ WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+ PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS
+ OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
 #include "LabMidiSong.h"
 
 #include "LabMidiCommand.h"
@@ -72,6 +112,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <iostream>
 #include <math.h>
 #include <stdint.h>
+#include <string.h>
 #include <vector>
 
 namespace Lab {
@@ -333,8 +374,83 @@ namespace Lab {
         }
     }
     
-    void MidiSong::parse(uint8_t* file, int length, bool verbose)
+    
+    /*
+     ** decodeblock
+     **
+     ** decode 4 '6-bit' characters into 3 8-bit binary bytes
+     */
+    void decodeblock( unsigned char in[4], unsigned char out[3] )
     {
+        out[ 0 ] = (unsigned char ) (in[0] << 2 | in[1] >> 4);
+        out[ 1 ] = (unsigned char ) (in[1] << 4 | in[2] >> 2);
+        out[ 2 ] = (unsigned char ) (((in[2] << 6) & 0xc0) | in[3]);
+    }
+    
+    /*
+     ** Translation Table to decode (created by author)
+     */
+    static const char cd64[]="|$$$}rstuvwxyz{$$$$$$$>?@ABCDEFGHIJKLMNOPQRSTUVW$$$$$$XYZ[\\]^_`abcdefghijklmnopq";
+    
+    /*
+     ** decode
+     **
+     ** decode a base64 encoded stream discarding padding, line breaks and noise
+     */
+    void decode64(uint8_t* infile, uint8_t* outfile, int filelen)
+    {
+        unsigned char in[4], out[3], v;
+        int i, len;
+        
+        while(filelen > 0) {
+            for( len = 0, i = 0; i < 4 && (filelen > 0); i++ ) {
+                v = 0;
+                while( (filelen > 0) && v == 0 ) {
+                    v = (unsigned char) *infile++;
+                    --filelen;
+                    v = (unsigned char) ((v < 43 || v > 122) ? 0 : cd64[ v - 43 ]);
+                    if( v ) {
+                        v = (unsigned char) ((v == '$') ? 0 : v - 61);
+                    }
+                }
+                if(filelen > 0) {
+                    len++;
+                    if( v ) {
+                        in[ i ] = (unsigned char) (v - 1);
+                    }
+                }
+                else {
+                    in[i] = 0;
+                }
+            }
+            if( len ) {
+                decodeblock( in, out );
+                for( i = 0; i < len - 1; i++ ) {
+                    *outfile = out[i];
+                    ++outfile;
+                }
+            }
+        }
+    }
+    
+    
+    void MidiSong::parse(uint8_t* a, int length, bool verbose)
+    {
+        uint8_t* file = a;
+        uint8_t* b = 0;
+        
+        // Check if the MIDI file has been base64 encoded using the scheme
+        // Euphony has in its tracks files.
+        // https://github.com/qiao/euphony
+        //
+        const char* base64Test = "data:audio/midi;base64,";
+        int base64TestLen = strlen(base64Test);
+        if (!strncmp((const char*) file, base64Test, base64TestLen)) {
+            b = new uint8_t[length];
+            decode64(a + base64TestLen, b, length - base64TestLen);
+            file = b;
+        }
+
         clearTracks();
         tracks = new std::vector<MidiTrack*>();
         
@@ -395,8 +511,10 @@ namespace Lab {
         catch(...)
         {
         }
+        
+        delete [] b;
     }
-    
+
     void MidiSong::parse(char const*const path, bool verbose)
     {
         FILE* f = fopen(path, "rb");
@@ -407,6 +525,7 @@ namespace Lab {
             uint8_t* a = new uint8_t[l];
             fread(a, 1, l, f);
             fclose(f);
+
             parse(a, l, verbose);
             delete [] a;
         }

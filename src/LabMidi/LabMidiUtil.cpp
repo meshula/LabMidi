@@ -420,5 +420,24 @@ namespace Lab {
         return frequencyToNote(freq, 440.0f);
     }
 
+    char const*const bpmToTempoName(int bpm)
+    {
+        // cf. http://en.wikipedia.org/wiki/Tempo
+        if (bpm >= 178) return "Prestissimo";       // 178-208
+        if (bpm >= 168) return "Presto";            //168-177
+        if (bpm >= 132) return "Vivace";            // 132
+        if (bpm >= 105) return "Allegro";           // 105-132
+        if (bpm >= 91) return "Allegretto";         // 91-104
+        if (bpm >= 81) return "Moderato";           // 81-90
+        //if (bpm >= 71) return "Andantino";        // a bit faster than Andante
+        if (bpm >= 61) return "Andante";            // 61-80
+        //if (bpm >= 55) return "Andante Moderato"; // a bit slower than Andante
+        if (bpm >= 51) return "Adagio";             // 51-60
+        //if (bpm >= 60) return "Larghetto";        // 40-50
+        if (bpm >= 40) return "Largo";              // 40-50
+        //if (bpm >= 40) return "Lento";            // 40-60
+        if (bpm >= 20) return "Grave";              // 40-20
+        return "Larghissimo";                       // 0-20
+    }
     
 } // Lab

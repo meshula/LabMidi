@@ -157,14 +157,14 @@ public:
 class TestSoftSynth : public TestMidi
 {
 public:
-    TestSoftSynth()
+    TestSoftSynth(char const*const path)
     : midiSoftSynth(new Lab::MidiSoftSynth())
     , midiSong(0)
     , midiSongPlayer(0)
     {
         midiSoftSynth->initialize(1, 0);
         
-        FILE* f = fopen("resources/rachmaninov3.mid", "rb");
+        FILE* f = fopen(path, "rb");
         if (f)
         {
             fseek(f, 0, SEEK_END);
@@ -275,11 +275,12 @@ public:
 MidiApp::MidiApp()
 : _detail(new Detail())
 {
-#define TEST 2
+#define TEST 1
     switch (TEST) {
-        case 0: _detail->testMidi = new TestSoftSynth();     break;
-        case 1: _detail->testMidi = new TestInOut();         break;
-        case 2: _detail->testMidi = new TestFrequencyCalc(); break;
+        case 0: _detail->testMidi = new TestSoftSynth("resources/rachmaninov3.mid"); break;
+        case 1: _detail->testMidi = new TestSoftSynth("resources/209-Tchaikovsky - Russian Dance (Nutcracker)"); break;
+        case 2: _detail->testMidi = new TestInOut(); break;
+        case 3: _detail->testMidi = new TestFrequencyCalc(); break;
     }
     
     _detail->startTime = getElapsedSeconds();
