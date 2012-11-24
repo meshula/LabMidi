@@ -55,6 +55,6 @@ Thanks
 ------
 Thanks to ofxMidi <https://github.com/chrisoshea/ofxMidi> for inspiration, and jasmid <https://github.com/gasman/jasmid> for a clean implementation of a standard midi file reader, which I
 used as a jumping off point for the LabMidi midi file parser. Thanks to RtMidi <http://www.music.mcgill.ca/~gary/rtmidi/> for providing a robust platform abstraction.
-LabMidi is quite different from jasmid and ofxMidi because the focus is playing midi files, and providing basing routing functionality.
+LabMidi is quite different from jasmid and ofxMidi because the focus is playing midi files, and providing basic routing functionality.
 
 Thanks to qiao for posting lots of base64 encoded MIDI tracks at <https://github.com/qiao/euphony>.
