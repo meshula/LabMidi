@@ -16,7 +16,8 @@ Cross platform MIDI related utilities.
     class MidiSong
     A song is a collection of tracks, which are a list of MIDI events. A song can
     be parsed from a Standard MIDI file, or from a base64 encoded Standard MIDI file
-    with an appropriate header.
+    with an appropriate header. MML (Music Macro Language) data may also be parsed,
+    passed in as either an MML string, or a file path.
     
     class MidiSongPlayer
     Can play a single MidiSong. The class is initialized with a pointer
@@ -70,3 +71,6 @@ Thanks to <http://www.manythings.org/music/pianotheory/> for posting a very cool
 It's dual licensed GPL and CC-0. I used the tables in that utility, choosing the CC-0 license for this usage.
 
 There's 9,310 piano MIDI files here: <http://www.kuhmann.com/Yamaha.htm>
+
+Thanks to arle for publishing mml2mid (although where have the sources gone, the pages are down!), and to g200kg <http://www.g200kg.com/en/docs/webmodular/> for
+an MML player.
