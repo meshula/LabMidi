@@ -178,11 +178,11 @@ namespace Lab {
         }
 
         
-		AUGraph auGraph;
-		AUNode  limiterNode;
-		AUNode	outNode;
-		AudioUnit synthUnit;
-		UInt8 midiChannelInUse;
+        AUGraph auGraph;
+        AUNode  limiterNode;
+        AUNode	outNode;
+        AudioUnit synthUnit;
+        UInt8 midiChannelInUse;
     };
     
 #elif defined (_MSC_VER)

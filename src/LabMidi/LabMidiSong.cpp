@@ -121,7 +121,7 @@ namespace Lab {
      (big-endian value in groups of 7 bits,
      with top bit set to signify that another byte follows)
      */
-	int readVarInt(uint8_t*& dataStart)
+	int readVarInt(uint8_t const*& dataStart)
     {
         int result = 0;
 		while (true) {
@@ -136,14 +136,14 @@ namespace Lab {
 	}
     
     
-    int readInt16(uint8_t*& dataStart)
+    int readInt16(uint8_t const*& dataStart)
     {
         int result = int(*dataStart++) << 8;
         result += int(*dataStart++);
         return result;
     }
     
-    int readInt24(uint8_t*& dataStart)
+    int readInt24(uint8_t const*& dataStart)
     {
         int result = int(*dataStart++) << 16;
         result += int(*dataStart++) << 8;
@@ -151,7 +151,7 @@ namespace Lab {
         return result;
     }
     
-    int readInt32(uint8_t*& dataStart)
+    int readInt32(uint8_t const*& dataStart)
     {
         int result = int(*dataStart++) << 24;
         result += int(*dataStart++) << 16;
@@ -161,7 +161,7 @@ namespace Lab {
     }
     
 
-    MidiEvent* parseEvent(uint8_t*& dataStart, uint8_t lastEventTypeByte)
+    MidiEvent* parseEvent(uint8_t const*& dataStart, uint8_t lastEventTypeByte)
     {
         uint8_t eventTypeByte = *dataStart++;
         
@@ -357,6 +357,8 @@ namespace Lab {
 
     MidiSong::MidiSong()
     : tracks(0)
+    , ticksPerBeat(240)     // precision (number of ticks distinguishable per second)
+    , startingTempo(120)
     {
     }
 
@@ -397,7 +399,7 @@ namespace Lab {
      **
      ** decode a base64 encoded stream discarding padding, line breaks and noise
      */
-    void decode64(uint8_t* infile, uint8_t* outfile, int filelen)
+    void decode64(uint8_t const* infile, uint8_t* outfile, int filelen)
     {
         unsigned char in[4], out[3], v;
         int i, len;
@@ -434,9 +436,9 @@ namespace Lab {
     }
     
     
-    void MidiSong::parse(uint8_t* a, int length, bool verbose)
+    void MidiSong::parse(uint8_t const*const a, int length, bool verbose)
     {
-        uint8_t* file = a;
+        uint8_t const* file = a;
         uint8_t* b = 0;
         
         // Check if the MIDI file has been base64 encoded using the scheme
@@ -454,7 +456,7 @@ namespace Lab {
         clearTracks();
         tracks = new std::vector<MidiTrack*>();
         
-        uint8_t* dataStart = file;
+        uint8_t const* dataStart = file;
         
         int headerId = readInt32(dataStart);
         int headerLength = readInt32(dataStart);
@@ -495,7 +497,7 @@ namespace Lab {
 
                 tracks->push_back(new MidiTrack());
                 MidiTrack* track = tracks->back();
-                uint8_t* dataEnd = dataStart + headerLength;
+                uint8_t const* dataEnd = dataStart + headerLength;
                 uint8_t runningEvent = 0;
                 while (dataStart < dataEnd) {
                     int duration = readVarInt(dataStart);
@@ -531,4 +533,329 @@ namespace Lab {
         }
     }
 
+    //------------------------------------------------------------
+    // MML support
+    //
+    
+    int secondsToTicks(double seconds, double bpm, int ticksPerBeat)
+    {
+        double beats = seconds * (bpm / 60.0);
+        double ticks = beats * ticksPerBeat;
+        return int(ticks);
+    }
+    
+    int wholeNoteToTicks(double fraction, double bpm, int ticksPerBeat)
+    {
+        double seconds = (bpm / 60.0f) / fraction;
+        return secondsToTicks(seconds, bpm, ticksPerBeat);
+    }
+
+    int getMMLInt(char const*& curr)
+    {
+        int v = 0;
+        char c = *curr;
+        int sign = 1;
+        while (c == '-' || (c >= '0' && c <= '9')) {
+            if (c == '-')
+                sign = -1;
+            else
+                v = v * 10 + (c - '0');
+            ++curr;
+            c = *curr;
+        }
+        return v * sign;
+    }
+    
+    int sharpFlat(char const*& midifiledata)
+    {
+        char c = *midifiledata;
+        if (c == '-') {
+            ++midifiledata;
+            return -1;
+        }
+        if (c == '+' || c == '#') {
+            ++midifiledata;
+            return 1;
+        }
+        return 0;
+    }
+    
+    int dotted(char const*& midifiledata, int bpm, int ticksPerBeat, int l)
+    {
+        int ret = l;
+        
+        // denominator is a fraction of a whole note
+        int denominator = getMMLInt(midifiledata);
+        if (denominator)
+            ret = denominator;
+        
+        int l2 = ret * 2;
+        char c = *midifiledata;
+        while (c == '.') {
+            ++midifiledata;
+            ret += l2;
+            l2 = l2 * 2;
+        }
+        return wholeNoteToTicks(ret, bpm, ticksPerBeat);
+    }
+    
+    // duration is in ticks
+    //
+    void storeMMLEvent(MidiTrack* track, uint8_t eventTypeByte, uint8_t note, uint8_t amount, int duration)
+    {
+        /* channel event */
+        ChannelEvent* event = new ChannelEvent();
+        event->deltatime = duration;
+        event->midiCommand = eventTypeByte;
+        event->param1 = note;
+        event->param2 = amount;
+        track->events.push_back(event);
+    }
+    
+    // The variant of MML parsed here was produced by studying http://www.g200kg.com/en/docs/webmodular/,
+    // mml2mid by Arle (unfortunately Arle's pages and the mml2mid sources are no longer online) and
+    // the wikipedia artile http://en.wikipedia.org/wiki/Music_Macro_Language
+    // 
+    
+    // sample MML from http://www.g200kg.com/en/docs/webmodular/
+    // t150 e-d-<g-4>g-rg-4e-d-<g-4>g-rg-4e-d-<g-4>g-4<e-4>g-4<d-4>frf4e-d-<d-4>frf4e-d-<d-4>frf4e-d-<d-4>f4<e-4>f4<g-4>g-rg-4
+    
+    void MidiSong::parseMML(char const*const mmlStr, int length, bool verbose)
+    {
+        char const* curr = mmlStr;
+        char const* end = mmlStr + length;
+        
+        int octave = 4;
+        int tr = 0;
+        int err = 0;
+        bool tied = false;
+        int tempo = 120;
+        int len = 8;        // an 1/8th note
+        
+        clearTracks();
+        tracks = new std::vector<MidiTrack*>();
+        tracks->push_back(new MidiTrack());
+        MidiTrack* track = tracks->back();
+        
+        do {
+            char c = *curr++;
+            
+            switch(c) {
+            case 'l':   // length NN
+            case 'L':
+                len = getMMLInt(curr);
+                break;
+                    
+            case 'o':
+            case 'O':
+                octave = getMMLInt(curr);
+                if (octave < 0)
+                    octave = 0;
+                if (octave > 7)
+                    octave = 7;
+                break;
+                    
+            case '<':
+                ++octave;
+                if (octave > 7)
+                    octave = 7;
+                break;
+            case '>':
+                --octave;
+                if (octave < 0)
+                    octave = 0;
+                break;
+                    
+            case '@': { // tone selection
+                int i = getMMLInt(curr);
+                if (i < 0)
+                    i = 0;
+                if (i > 127)
+                    i = 127;
+                storeMMLEvent(track, MIDI_PROGRAM_CHANGE | tr, i, 0xff, 0);
+                break;
+            }
+                
+            case 't':       // tempo in bpm
+            case 'T': {
+                tempo = getMMLInt(curr);
+                if (tempo < 0)
+                    tempo = 0;
+                if (tempo > 500)
+                    tempo = 500;
+                SetTempoEvent* event = new SetTempoEvent();
+                event->microsecondsPerBeat = 60000000 / tempo;
+                event->deltatime = 0;
+                track->events.push_back(event);
+                break;
+            }
+                
+            case '/':
+                tr++;
+                if (tr > 15)
+                    tr = 15;
+                while (tr >= tracks->size())
+                    tracks->push_back(new MidiTrack());
+                track = (*tracks)[tr];
+                break;
+            
+            case 'c':
+            case 'C': {
+                int note = 0 + sharpFlat(curr) + octave * 12;
+                int duration = dotted(curr, tempo, ticksPerBeat, len);
+                // note output { tr, cnt, size 3, 0x90|tr note & 0x7f vol=0x7f }
+                if (!tied) {
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0, duration);
+                }
+                else {
+                    // note output { tr, cnt-1, size 3, 0x90|tr note & 0x7f vol=0x00 }
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, duration);
+                    tied = false;
+                }
+                break;
+            }
+            case 'd':
+            case 'D': {
+                int note = 2 + sharpFlat(curr) + octave * 12;
+                int duration = dotted(curr, tempo, ticksPerBeat, len);
+                // note output { tr, cnt, size 3, 0x90|tr note & 0x7f vol=0x7f }
+                if (!tied) {
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0, duration);
+                }
+                else {
+                    // note output { tr, cnt-1, size 3, 0x90|tr note & 0x7f vol=0x00 }
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, duration);
+                    tied = false;
+                }
+                break;
+            }
+            case 'e':
+            case 'E': {
+                int note = 4 + sharpFlat(curr) + octave * 12;
+                int duration = dotted(curr, tempo, ticksPerBeat, len);
+                // note output { tr, cnt, size 3, 0x90|tr note & 0x7f vol=0x7f }
+                if (!tied) {
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0, duration);
+                }
+                else {
+                    // note output { tr, cnt-1, size 3, 0x90|tr note & 0x7f vol=0x00 }
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, duration);
+                    tied = false;
+                }
+                break;
+            }
+            case 'f':
+            case 'F': {
+                int note = 5 + sharpFlat(curr) + octave * 12;
+                int duration = dotted(curr, tempo, ticksPerBeat, len);
+                // note output { tr, cnt, size 3, 0x90|tr note & 0x7f vol=0x7f }
+                if (!tied) {
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0, duration);
+                }
+                else {
+                    // note output { tr, cnt-1, size 3, 0x90|tr note & 0x7f vol=0x00 }
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, duration);
+                    tied = false;
+                }
+                break;
+            }
+            case 'g':
+            case 'G': {
+                int note = 7 + sharpFlat(curr) + octave * 12;
+                int duration = dotted(curr, tempo, ticksPerBeat, len);
+                // note output { tr, cnt, size 3, 0x90|tr note & 0x7f vol=0x7f }
+                if (!tied) {
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0, duration);
+                }
+                else {
+                    // note output { tr, cnt-1, size 3, 0x90|tr note & 0x7f vol=0x00 }
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, duration);
+                    tied = false;
+                }
+                break;
+            }
+            case 'a':
+            case 'A': {
+                int note = 9 + sharpFlat(curr) + octave * 12;
+                int duration = dotted(curr, tempo, ticksPerBeat, len);
+                // note output { tr, cnt, size 3, 0x90|tr note & 0x7f vol=0x7f }
+                if (!tied) {
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0, duration);
+                }
+                else {
+                    // note output { tr, cnt-1, size 3, 0x90|tr note & 0x7f vol=0x00 }
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, duration);
+                    tied = false;
+                }
+                break;
+            }
+            case 'b':
+            case 'B': {
+                int note = 11 + sharpFlat(curr) + octave * 12;
+                int duration = dotted(curr, tempo, ticksPerBeat, len);
+                // note output { tr, cnt, size 3, 0x90|tr note & 0x7f vol=0x7f }
+                if (!tied) {
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0, duration);
+                }
+                else {
+                    // note output { tr, cnt-1, size 3, 0x90|tr note & 0x7f vol=0x00 }
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                    storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, duration);
+                    tied = false;
+                }
+                break;
+            }
+                
+            case '&': // tie (how to handle?)
+                tied = true;
+                break;
+                
+            case 'r': // rest
+            case 'R':
+                storeMMLEvent(track, MIDI_NOTE_ON | tr, 0, 0, dotted(curr, tempo, ticksPerBeat, len));
+                tied = false;
+                break;
+                
+            case ' ': // ignore
+            case '	':
+            case 10:
+            case 13:
+                break;
+            
+            default:
+                err = 1;
+                break;
+            }
+        } while (curr < end);
+    }
+    
+    void MidiSong::parseMML(char const*const path, bool verbose)
+    {
+        FILE* f = fopen(path, "rb");
+        if (f) {
+            fseek(f, 0, SEEK_END);
+            int l = ftell(f);
+            fseek(f, 0, SEEK_SET);
+            char* a = new char[l];
+            fread(a, 1, l, f);
+            fclose(f);
+            
+            parseMML(a, l, verbose);
+            delete [] a;
+        }
+    }
+    
 } // Lab

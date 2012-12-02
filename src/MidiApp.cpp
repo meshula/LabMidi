@@ -157,29 +157,20 @@ public:
 class TestSoftSynth : public TestMidi
 {
 public:
-    TestSoftSynth(char const*const path)
+    TestSoftSynth(char const*const path, bool MML = false)
     : midiSoftSynth(new Lab::MidiSoftSynth())
     , midiSong(0)
     , midiSongPlayer(0)
     {
         midiSoftSynth->initialize(1, 0);
+        midiSong = new Lab::MidiSong();
+        if (MML)
+            midiSong->parseMML(path, strlen(path), true);
+        else
+            midiSong->parse(path, true);
         
-        FILE* f = fopen(path, "rb");
-        if (f)
-        {
-            fseek(f, 0, SEEK_END);
-            int l = ftell(f);
-            fseek(f, 0, SEEK_SET);
-            uint8_t* a = new uint8_t[l];
-            fread(a, 1, l, f);
-            fclose(f);
-            
-            midiSong = new Lab::MidiSong();
-            midiSong->parse(a, l, true);
-            midiSongPlayer = new Lab::MidiSongPlayer(midiSong, midiSoftSynth);
-            midiSongPlayer->play(0);
-            delete [] a;
-        }
+        midiSongPlayer = new Lab::MidiSongPlayer(midiSong, midiSoftSynth);
+        midiSongPlayer->play(0);
     }
     
     virtual ~TestSoftSynth()
@@ -272,15 +263,22 @@ public:
     TestMidi* testMidi;
 };
 
+// sample MML from http://www.g200kg.com/en/docs/webmodular/
+
+namespace {
+    const char* MMLtune = "t150 e-d-<g-4>g-rg-4e-d-<g-4>g-rg-4e-d-<g-4>g-4<e-4>g-4<d-4>frf4e-d-<d-4>frf4e-d-<d-4>frf4e-d-<d-4>f4<e-4>f4<g-4>g-rg-4";
+}
+
 MidiApp::MidiApp()
 : _detail(new Detail())
 {
-#define TEST 1
+#define TEST 2
     switch (TEST) {
         case 0: _detail->testMidi = new TestSoftSynth("resources/rachmaninov3.mid"); break;
         case 1: _detail->testMidi = new TestSoftSynth("resources/209-Tchaikovsky - Russian Dance (Nutcracker)"); break;
-        case 2: _detail->testMidi = new TestInOut(); break;
-        case 3: _detail->testMidi = new TestFrequencyCalc(); break;
+        case 2: _detail->testMidi = new TestSoftSynth(MMLtune, true); break;
+        case 3: _detail->testMidi = new TestInOut(); break;
+        case 4: _detail->testMidi = new TestFrequencyCalc(); break;
     }
     
     _detail->startTime = getElapsedSeconds();
