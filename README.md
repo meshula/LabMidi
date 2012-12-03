@@ -17,7 +17,9 @@ Cross platform MIDI related utilities.
     A song is a collection of tracks, which are a list of MIDI events. A song can
     be parsed from a Standard MIDI file, or from a base64 encoded Standard MIDI file
     with an appropriate header. MML (Music Macro Language) data may also be parsed,
-    passed in as either an MML string, or a file path.
+    passed in as either an MML string, or a file path. The version parsed is a restricted
+    form of Modern MML, and not nearly as sophisticated as what mml2mid can currently
+    process.
     
     class MidiSongPlayer
     Can play a single MidiSong. The class is initialized with a pointer
@@ -72,5 +74,5 @@ It's dual licensed GPL and CC-0. I used the tables in that utility, choosing the
 
 There's 9,310 piano MIDI files here: <http://www.kuhmann.com/Yamaha.htm>
 
-Thanks to arle for publishing mml2mid (although where have the sources gone, the pages are down!), and to g200kg <http://www.g200kg.com/en/docs/webmodular/> for
-an MML player.
+Thanks to arle <http://www17.atpages.jp/~arle/index.php?%E3%83%8D%E3%82%BF> for publishing mml2mid <http://hpc.jp/~mml2mid/>, 
+and to g200kg <http://www.g200kg.com/en/docs/webmodular/> for an MML player.
