@@ -44,3 +44,40 @@ solution "MidiApp"
         configuration "macosx"
             linkoptions  { "-std=c++11", "-stdlib=libc++" }
             buildoptions { "-std=c++11", "-stdlib=libc++" }
+
+    project "LabMidiPorts"
+        kind "ConsoleApp"
+        language "C++"
+        platforms { "x32", "x64" }
+        
+        includedirs { "src" }
+        
+        files { "src/MidiPortsApp.h", "src/MidiPortsApp.cpp",
+                "osx/Info.plist", "Resources/**" }
+                
+        links {
+              "AudioToolbox.framework",
+              "AudioUnit.framework",
+              "Carbon.framework",
+              "Cocoa.framework",
+              "CoreAudio.framework",
+              "CoreFoundation.framework",
+              "CoreMIDI.framework",
+              "LabMidi"
+              }
+        
+        libdirs { }
+            
+        configuration "Debug"
+            targetdir "build/Debug"
+            defines {  "DEBUG", "__MACOSX_CORE__", "OSX" }
+            flags { "Symbols" }
+    
+        configuration "Release"
+            targetdir "build/Release"
+            defines { "NDEBUG", "__MACOSX_CORE__", "OSX" }
+            flags { "Optimize" } 
+
+        configuration "macosx"
+            linkoptions  { "-std=c++11", "-stdlib=libc++" }
+            buildoptions { "-std=c++11", "-stdlib=libc++" }

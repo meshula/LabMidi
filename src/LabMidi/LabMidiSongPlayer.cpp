@@ -38,6 +38,7 @@
 
 #include "LabMidiUtil.h"
 
+#include <alloca.h>
 #include <stdint.h>
 
 namespace Lab {

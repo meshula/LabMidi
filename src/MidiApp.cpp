@@ -53,6 +53,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #else
 #include <time.h>
 #include <sys/time.h>
+#include <unistd.h>
 #endif
 
 void midiPrintCallback(void* userData, Lab::MidiCommand* c)
@@ -274,13 +275,14 @@ namespace {
 MidiApp::MidiApp()
 : _detail(new Detail())
 {
-#define TEST 1
+#define TEST 5
     switch (TEST) {
         case 0: _detail->testMidi = new TestSoftSynth("resources/rachmaninov3.mid"); break;
         case 1: _detail->testMidi = new TestSoftSynth("resources/209-Tchaikovsky - Russian Dance (Nutcracker)"); break;
         case 2: _detail->testMidi = new TestSoftSynth(MMLtune, true); break;
         case 3: _detail->testMidi = new TestInOut(); break;
         case 4: _detail->testMidi = new TestFrequencyCalc(); break;
+        case 5: _detail->testMidi = new TestSoftSynth("resources/106-Grieg - In the Hall of the Mountain King (Peer Gynt)"); break;
     }
     
     _detail->startTime = getElapsedSeconds();
