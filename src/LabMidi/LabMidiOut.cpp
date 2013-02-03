@@ -64,14 +64,14 @@ namespace Lab {
             }
         }
         
-        bool openPort(unsigned int port)
+        bool openPort(unsigned int p)
         {
             if (port != -1)
                 closePort();
             
             try {
-                midiOut->openPort(port);
-                port = port;
+                midiOut->openPort(p, "MidiOut");
+                port = p;
             }
             catch(RtError& rterr) {
                 port = -1;
