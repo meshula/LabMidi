@@ -107,7 +107,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "LabMidiSong.h"
 
 #include "LabMidiCommand.h"
-#include "LabMidiOut.h"
 
 #include <iostream>
 #include <math.h>

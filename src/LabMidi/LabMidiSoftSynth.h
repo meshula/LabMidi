@@ -35,6 +35,7 @@
 #pragma once
 
 #include "LabMidiOut.h"
+#include "LabMidiEvent.h"
 
 namespace Lab {
     
@@ -47,6 +48,9 @@ namespace Lab {
         
         void initialize(int midiChannel, char const*const bankPath);
         virtual void command(const MidiCommand*);
+        
+        // user data will be a MidiSoftSynth pointer
+        static void playerCallback(void* userData, MidiRtEvent*);
         
     private:
         class Detail;

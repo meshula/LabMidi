@@ -169,5 +169,13 @@ namespace Lab {
             message.push_back(mc->byte2);
         _detail->midiOut->sendMessage(&message);
     }
+    
+    void MidiOut::playerCallback(void* userData, MidiRtEvent* ev)
+    {
+        MidiOut* mo = static_cast<MidiOut*>(userData);
+        if (mo)
+            mo->command(&ev->command);
+    }
+
 
 } // Lab

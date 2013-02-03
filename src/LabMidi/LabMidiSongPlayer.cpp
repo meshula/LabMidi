@@ -1,4 +1,4 @@
-//
+;//
 //  LabMidiSongPlayer.cpp
 //
 
@@ -32,42 +32,23 @@
 #include "LabMidiSongPlayer.h"
 
 #include "LabMidiCommand.h"
-#include "LabMidiOut.h"
+#include "LabMidiEvent.h"
+
 #include "LabMidiSong.h"
+
+#include "LabMidiUtil.h"
 
 #include <stdint.h>
 
 namespace Lab {
-
-    struct MidiRtEvent
-    {
-        MidiRtEvent(float t, uint8_t b1, uint8_t b2, uint8_t b3)
-        : time(t)
-        {
-            command.command = b1;
-            command.byte1 = b2;
-            command.byte2 = b3;
-        }
-        
-        MidiRtEvent& operator=(const MidiRtEvent& rhs)
-        {
-            time = rhs.time;
-            command = rhs.command;
-            return *this;
-        }
-        
-        float time;
-        MidiCommand command;
-    };
     
     class MidiSongPlayer::Detail
     {
     public:
         
-        Detail(MidiSong* s, MidiOutBase* mo)
+        Detail(MidiSong* s)
         : song(s)
         , startTime(0)
-        , midiOut(mo)
         , eventCursor(0)
         {
             beatsPerMinute = s ? s->startingTempo : 120.0f; // 120 is the standard default value
@@ -82,10 +63,12 @@ namespace Lab {
             
             float newTime = wallclockTime - startTime;
             while (eventCursor < events.size() && events[eventCursor].time <= newTime) {
-                if (midiOut) {
-                    MidiRtEvent& ev = events[eventCursor];
-                    midiOut->command(&ev.command);
-                }
+
+                MidiRtEvent& ev = events[eventCursor];
+                
+                for (auto i = callbacks.begin(); i != callbacks.end(); ++i)
+                    (*i).second((*i).first, &ev);
+                
                 ++eventCursor;
             }
         }
@@ -93,8 +76,15 @@ namespace Lab {
         double ticksToSeconds(int ticks)
         {
             double beats = double(ticks) / ticksPerBeat;
-            double seconds = beats / (beatsPerMinute / 60);
+            double seconds = beats / (beatsPerMinute / 60.f);
             return seconds;
+        }
+        
+        double secondsToTicks(float seconds)
+        {
+            double ticksPerSecond = (beatsPerMinute * ticksPerBeat) / 60.f;
+            double ticks = ticksPerSecond * seconds;
+            return (int)ticks;
         }
         
         void recordEvent(double now, MidiEvent* ev)
@@ -104,13 +94,11 @@ namespace Lab {
                 beatsPerMinute = 60000000.0f / float(ste->microsecondsPerBeat);
             }
             else if (ev->eventType == MIDI_EventChannel) {
-                if (midiOut) {
-                    ChannelEvent* ce = (ChannelEvent*) ev;
-                    events.push_back(MidiRtEvent(float(now), ce->midiCommand, ce->param1, ce->param2));
-                }
+                ChannelEvent* ce = (ChannelEvent*) ev;
+                events.push_back(MidiRtEvent(float(now), ce->midiCommand, ce->param1, ce->param2));
             }
         }
-
+        
         std::vector<MidiRtEvent> events;
         
         MidiSong* song;
@@ -120,16 +108,16 @@ namespace Lab {
         double ticksPerBeat;
         int eventCursor;
         
-        MidiOutBase* midiOut;
+        std::vector<std::pair<void*, MidiEventCallbackFn> > callbacks;
     };
     
-    MidiSongPlayer::MidiSongPlayer(MidiSong* s, MidiOutBase* midiOut)
-    : _detail(new Detail(s, midiOut))
+    MidiSongPlayer::MidiSongPlayer(MidiSong* s)
+    : _detail(new Detail(s))
     {
-        if (s) {
+        if (s && s->tracks) {
             std::vector<MidiTrack*>& tracks = *(s->tracks);
             int tc = tracks.size();
-
+            
             // double, because don't want to introduce sync slip during rendering
             double* nextTime = (double*) alloca(sizeof(double) * tc);
             int* nextIndex = (int*) alloca(sizeof(int) * tc);
@@ -155,7 +143,7 @@ namespace Lab {
                 }
                 if (nt == -1)
                     break;
-
+                
                 MidiEvent* ev = tracks[nt]->events[nextIndex[nt]];
                 _detail->recordEvent(nextTime[nt], ev);
                 ++nextIndex[nt];
@@ -185,5 +173,23 @@ namespace Lab {
     {
         return _detail->events.back().time;
     }
-
+    
+    void MidiSongPlayer::addCallback(MidiEventCallbackFn f, void* userData)
+    {
+        _detail->callbacks.push_back(std::pair<void*, MidiEventCallbackFn>(userData, f));
+    }
+    
+    void MidiSongPlayer::removeCallback(void* userData)
+    {
+        std::vector<std::pair<void*, MidiEventCallbackFn> >::iterator i = _detail->callbacks.begin();
+        while (i != _detail->callbacks.end()) {
+            if (userData == (*i).first) {
+                _detail->callbacks.erase(i);
+                i = _detail->callbacks.begin();
+            }
+            else
+                ++i;
+        }
+    }
+    
 } // Lab

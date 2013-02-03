@@ -1,5 +1,5 @@
 //
-//  LabMidiSongPlayer.h
+//  LabMidiEvent.h
 //
 
 /*
@@ -29,35 +29,8 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#pragma once
-
 #include "LabMidiEvent.h"
 
 namespace Lab {
-
-    class MidiSong;
     
-    struct MidiRtEvent;
-    
-    typedef void (*MidiEventCallbackFn)(void* userData, MidiRtEvent*);
-    
-    class MidiSongPlayer {
-    public:
-        MidiSongPlayer(MidiSong*);
-        ~MidiSongPlayer();
-        
-        void play(float wallClockTime);
-        void update(float wallClockTime);
-        
-        float length() const; // length of the contained song
-        
-        void addCallback(MidiEventCallbackFn, void* userData);
-        void removeCallback(void* userData);
-        
-    private:
-        class Detail;
-        Detail* _detail;
-    };
-
 } // Lab
-

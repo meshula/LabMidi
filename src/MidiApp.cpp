@@ -36,14 +36,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "MidiApp.h"
 
-#include "LabMidiCommand.h"
-#include "LabMidiIn.h"
-#include "LabMidiOut.h"
-#include "LabMidiPorts.h"
-#include "LabMidiSoftSynth.h"
-#include "LabMidiSong.h"
-#include "LabMidiSongPlayer.h"
-#include "LabMidiUtil.h"
+#include "LabMidi/LabMidiCommand.h"
+#include "LabMidi/LabMidiIn.h"
+#include "LabMidi/LabMidiOut.h"
+#include "LabMidi/LabMidiPorts.h"
+#include "LabMidi/LabMidiSoftSynth.h"
+#include "LabMidi/LabMidiSong.h"
+#include "LabMidi/LabMidiSongPlayer.h"
+#include "LabMidi/LabMidiUtil.h"
 
 #include <iostream>
 
@@ -107,7 +107,8 @@ public:
         
         midiSong = new Lab::MidiSong();
         midiSong->parse("resources/minute_waltz.mid", true);
-        midiSongPlayer = new Lab::MidiSongPlayer(midiSong, midiOut);
+        midiSongPlayer = new Lab::MidiSongPlayer(midiSong);
+        midiSongPlayer->addCallback(Lab::MidiOut::playerCallback, midiOut);
         midiSongPlayer->play(0);
     }
     
@@ -169,7 +170,8 @@ public:
         else
             midiSong->parse(path, true);
         
-        midiSongPlayer = new Lab::MidiSongPlayer(midiSong, midiSoftSynth);
+        midiSongPlayer = new Lab::MidiSongPlayer(midiSong);
+        midiSongPlayer->addCallback(Lab::MidiSoftSynth::playerCallback, midiSoftSynth);
         midiSongPlayer->play(0);
     }
     
@@ -272,7 +274,7 @@ namespace {
 MidiApp::MidiApp()
 : _detail(new Detail())
 {
-#define TEST 2
+#define TEST 1
     switch (TEST) {
         case 0: _detail->testMidi = new TestSoftSynth("resources/rachmaninov3.mid"); break;
         case 1: _detail->testMidi = new TestSoftSynth("resources/209-Tchaikovsky - Russian Dance (Nutcracker)"); break;

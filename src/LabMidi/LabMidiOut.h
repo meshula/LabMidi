@@ -33,6 +33,8 @@
 
 #pragma once
 
+#include "LabMidiEvent.h"
+
 #include <string>
 #include <vector>
 
@@ -66,6 +68,9 @@ namespace Lab {
         void sendPitchBend    (int channel, int lsb, int msb);
         
         virtual void command(const MidiCommand*);
+
+        // user data will be a MidiSoftSynth pointer
+        static void playerCallback(void* userData, MidiRtEvent*);
         
     private:
         class Detail;

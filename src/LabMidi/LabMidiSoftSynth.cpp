@@ -42,6 +42,7 @@
 #include <AudioToolbox/AudioToolbox.h> // for AUGraph
 #include <CoreMIDI/CoreMIDI.h>
 #include <CoreAudio/HostTime.h>
+#include <AssertMacros.h> // to avoid 10.8 DebugAssert deprecation warnings
 #include <CoreServices/CoreServices.h>
 
 #endif
@@ -224,6 +225,14 @@ namespace Lab {
     {
         _detail->command(c);
     }
+    
+    void MidiSoftSynth::playerCallback(void* userData, MidiRtEvent* ev)
+    {
+        MidiSoftSynth* mss = static_cast<MidiSoftSynth*>(userData);
+        if (mss)
+            mss->command(&ev->command);
+    }
+
 
 } // Lab
 
