@@ -164,12 +164,10 @@ int main(int argc, char** argv)
     std::string path;
     op.AddIntOption("o", "outport", port, "A valid MIDI output port number");
     op.AddStringOption("f", "file", path, "Path to the file to play");
-    if (op.Parse(argc, argv))
-    {
+    if (op.Parse(argc, argv)) {
         if (port == -1 || !path.length())
             op.Usage();
-        else
-        {
+        else {
             Lab::MidiOut* midiOut = new Lab::MidiOut();
             midiOut->openPort(port);
             Lab::MidiSong* midiSong = new Lab::MidiSong();
