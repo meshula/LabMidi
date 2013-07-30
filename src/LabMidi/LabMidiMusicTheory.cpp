@@ -291,7 +291,7 @@ namespace Lab {
     
     void rhythm(int steps, int pulses, std::vector<uint8_t>& pattern) {
         pattern.clear();
-        pattern.resize(steps);
+        pattern.reserve(steps);
         if (pulses > steps || pulses == 0 || steps == 0) {
             return;
         }
