@@ -37,7 +37,7 @@ namespace Lab {
     
     /*
      http://www.midi.org/techspecs/midimessages.php
-     Command	 Meaning	 # parameters	 param 1	 param 2
+     Command Meaning	 # parameters	 param 1	 param 2
      0x80	 Note-off	 2	 key	 velocity
      0x90	 Note-on	 2	 key	 velocity
      0xA0	 Aftertouch	 2	 key	 touch

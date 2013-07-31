@@ -275,7 +275,7 @@ namespace {
 MidiApp::MidiApp()
 : _detail(new Detail())
 {
-#define TEST 5
+#define TEST 0
     switch (TEST) {
         case 0: _detail->testMidi = new TestSoftSynth("resources/rachmaninov3.mid"); break;
         case 1: _detail->testMidi = new TestSoftSynth("resources/209-Tchaikovsky - Russian Dance (Nutcracker)"); break;
