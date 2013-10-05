@@ -251,4 +251,71 @@ namespace Lab {
         return keys;
     }
     
+    
+    /*
+     A port to C++ of an implementation of the Bjorklund algorithm as implemented in JavaScript 
+     by Jack Rutherford.
+     
+     http://blog.fader.co.uk/post/11519018856/bjorklund-algorithm-and-euclidean-rhythms
+     
+     Inspired by the paper 'The Euclidean Algorithm Generates Traditional Musical Rhythms'
+     by Godfried Toussaint
+     
+     http://cgm.cs.mcgill.ca/~godfried/publications/banff.pdf
+     
+     This is a port of the original algorithm by E. Bjorklund found in the paper 'The Theory of 
+     Rep-Rate Pattern Generation in the SNS Timing Systems' by E. Bjorklund.
+     
+     https://ics-web.sns.ornl.gov/timing/Rep-Rate%20Tech%20Note.pdf
+     */
+    
+    void build(int level, int r,
+               std::vector<uint8_t>& pattern,
+               std::vector<int>& counts,
+               std::vector<int>& remainders
+               ) {
+        r++;
+        if (level > -1) {
+            for (int i=0; i < counts[level]; i++) {
+                build(level-1, r, pattern, counts, remainders);
+            }
+            if (remainders[level] != 0) {
+                build(level-2, r, pattern, counts, remainders);
+            }
+        } else if (level == -1) {
+            pattern.push_back(0);
+        } else if (level == -2) {
+            pattern.push_back(1);
+        }
+    }
+    
+    void rhythm(int steps, int pulses, std::vector<uint8_t>& pattern) {
+        pattern.clear();
+        pattern.reserve(steps);
+        if (pulses > steps || pulses == 0 || steps == 0) {
+            return;
+        }
+        
+        std::vector<int> counts;
+        std::vector<int> remainders;
+        
+        int divisor = steps - pulses;
+        remainders.push_back(pulses);
+        int level = 0;
+        
+        while(true) {
+            counts.push_back(divisor / remainders[level]);
+            remainders.push_back(divisor % remainders[level]);
+            divisor = remainders[level];
+            level += 1;
+            if (remainders[level] <= 1) {
+                break;
+            }
+        }
+        
+        counts.push_back(divisor);
+        
+        build(level, 0, pattern, counts, remainders);
+    }
+
 } // Lab

@@ -32,6 +32,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <vector>
 
 // The number of scales encoded in this module
 //
@@ -87,3 +88,9 @@ uint8_t (&cirlceOfFifths())[12];
 // the black keys are on a piano keyboard. The 0th index indicates C.
 //
 bool (&blackKeys())[12];
+
+// Given a number of steps, and the number of beats that occurs during those
+// steps, fill in the result array with a pattern where those beats are
+// evenly distributed according to Bjorklund's algorithm.
+//
+void rhythm(int steps, int beats, std::vector<uint8_t>& result);

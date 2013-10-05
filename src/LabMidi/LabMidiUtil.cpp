@@ -336,54 +336,55 @@ namespace Lab {
         return instrumentNames[instrument];
     }
     
+    // MIDI channel 10 is reserved for percussion
     const char* percussionNames[47] = {
-        "Acoustic Bass Drum",
-        "Bass Drum 1",
+        "Acoustic Bass Drum",   // 35
+        "Bass Drum 1",          // 36
         "Side Stick",
         "Acoustic Snare",
         "Hand Clap",
-        "Electric Snare",
+        "Electric Snare",       // 40
         "Low Floor Tom",
         "Closed Hi-hat",
         "Low Floor Tom",
         "Pedal Hi-hat",
-        "Low Tom",
+        "Low Tom",              // 45
         "Open High Hat",
         "Mid Low Tom",
         "High Mid Tom",
         "Crash Cymbal",
-        "High Tom",
+        "High Tom",             // 50
         "Ride Cymbal 1",
         "Chinese Cymbal",
         "Ride Bell",
         "Tambourine",
-        "Splash Cymbal",
+        "Splash Cymbal",        // 55
         "Cowbell",
         "Crash Cymbal 2",
         "Vibra Slap",
         "Ride Cymbal 2",
-        "High Bongo",
+        "High Bongo",           // 60
         "Low Bongo",
         "Mute High Conga",
         "Open High Conga",
         "Low Conga",
-        "High Timbale",
+        "High Timbale",         // 65
         "Low Timbale",
         "High Agogo",
         "Low Agogo",
         "Cabasa",
-        "Maracas",
+        "Maracas",              // 70
         "Short Whistle",
         "Long Whistle",
         "Short Guiro",
         "Long Guiro",
         "Claves",
-        "High Wood Block",
+        "High Wood Block",      // 75
         "Low Wood Block",
         "Mute Cuica",
         "Open Cuica",
         "Mute Triangle",
-        "Open Triangle"
+        "Open Triangle"         // 80
     };
     
     const char* percussionName(uint8_t channel10noteNumber)
@@ -424,20 +425,20 @@ namespace Lab {
     {
         // cf. http://en.wikipedia.org/wiki/Tempo
         if (bpm >= 178) return "Prestissimo";       // 178-208
-        if (bpm >= 168) return "Presto";            //168-177
-        if (bpm >= 132) return "Vivace";            // 132
+        if (bpm >= 168) return "Presto";            // 168-177
+        if (bpm >= 132) return "Vivace";            //     132
         if (bpm >= 105) return "Allegro";           // 105-132
-        if (bpm >= 91) return "Allegretto";         // 91-104
-        if (bpm >= 81) return "Moderato";           // 81-90
+        if (bpm >= 91) return "Allegretto";         //  91-104
+        if (bpm >= 81) return "Moderato";           //   81-90
         //if (bpm >= 71) return "Andantino";        // a bit faster than Andante
-        if (bpm >= 61) return "Andante";            // 61-80
+        if (bpm >= 61) return "Andante";            //   61-80
         //if (bpm >= 55) return "Andante Moderato"; // a bit slower than Andante
-        if (bpm >= 51) return "Adagio";             // 51-60
-        //if (bpm >= 60) return "Larghetto";        // 40-50
-        if (bpm >= 40) return "Largo";              // 40-50
-        //if (bpm >= 40) return "Lento";            // 40-60
-        if (bpm >= 20) return "Grave";              // 40-20
-        return "Larghissimo";                       // 0-20
+        if (bpm >= 51) return "Adagio";             //   51-60
+        //if (bpm >= 60) return "Larghetto";        //   40-50
+        if (bpm >= 40) return "Largo";              //   40-50
+        //if (bpm >= 40) return "Lento";            //   40-60
+        if (bpm >= 20) return "Grave";              //   40-20
+        return "Larghissimo";                       //    0-20
     }
     
 } // Lab
