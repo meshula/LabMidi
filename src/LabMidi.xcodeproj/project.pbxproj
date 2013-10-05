@@ -1,0 +1,375 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 45;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		0E4E37F01B9F7C61710E6F72 /* LabMidiCommand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 55751230127E18DD56861B3C /* LabMidiCommand.cpp */; };
+		29B8209C7399715B12316521 /* LabMidiEvent.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 203E4CAA35B17B0A675C784B /* LabMidiEvent.cpp */; };
+		7C614D1D36943063529D436C /* LabMidiIn.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 47870A733EF17D37625740DD /* LabMidiIn.cpp */; };
+		57574937475A14B30DC85F60 /* LabMidiMusicTheory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 691E4D0943761685121D5E00 /* LabMidiMusicTheory.cpp */; };
+		54C41A66233046173EF42FBE /* LabMidiOut.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7AFF2F004D3835DB4FC345B0 /* LabMidiOut.cpp */; };
+		63BC050D510F654933E474C4 /* LabMidiPorts.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 626A4A525D624EE0045A396A /* LabMidiPorts.cpp */; };
+		74AB0976422C061A48BC565B /* LabMidiSoftSynth.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 04004FEC11C86A1314E233D9 /* LabMidiSoftSynth.cpp */; };
+		5ABB4D9D3214718629F3413C /* LabMidiSong.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 43A518FB07B663D27DBF0AC2 /* LabMidiSong.cpp */; };
+		0E57056D5A6D51322BE202D6 /* LabMidiSongPlayer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 35F1229F17BA4BD455E2003E /* LabMidiSongPlayer.cpp */; };
+		228641595FFC4ADC5E607C83 /* LabMidiUtil.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 170E2B8811650B0716D50C64 /* LabMidiUtil.cpp */; };
+		44E06FB961C554CD06FA37BC /* RtMidi.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 687377536CA429112032636F /* RtMidi.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		55751230127E18DD56861B3C /* LabMidiCommand.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "LabMidiCommand.cpp"; path = "LabMidiCommand.cpp"; sourceTree = "<group>"; };
+		5EE546D9575A01DE32266F25 /* LabMidiCommand.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "LabMidiCommand.h"; path = "LabMidiCommand.h"; sourceTree = "<group>"; };
+		203E4CAA35B17B0A675C784B /* LabMidiEvent.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "LabMidiEvent.cpp"; path = "LabMidiEvent.cpp"; sourceTree = "<group>"; };
+		120C69B451AD56F904C2089E /* LabMidiEvent.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "LabMidiEvent.h"; path = "LabMidiEvent.h"; sourceTree = "<group>"; };
+		47870A733EF17D37625740DD /* LabMidiIn.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "LabMidiIn.cpp"; path = "LabMidiIn.cpp"; sourceTree = "<group>"; };
+		7D2D3D2F70CA635860525FCC /* LabMidiIn.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "LabMidiIn.h"; path = "LabMidiIn.h"; sourceTree = "<group>"; };
+		691E4D0943761685121D5E00 /* LabMidiMusicTheory.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "LabMidiMusicTheory.cpp"; path = "LabMidiMusicTheory.cpp"; sourceTree = "<group>"; };
+		4634352931E279AA0FC56CE8 /* LabMidiMusicTheory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "LabMidiMusicTheory.h"; path = "LabMidiMusicTheory.h"; sourceTree = "<group>"; };
+		7AFF2F004D3835DB4FC345B0 /* LabMidiOut.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "LabMidiOut.cpp"; path = "LabMidiOut.cpp"; sourceTree = "<group>"; };
+		6D5D35C20C167E3F5A3F0D70 /* LabMidiOut.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "LabMidiOut.h"; path = "LabMidiOut.h"; sourceTree = "<group>"; };
+		626A4A525D624EE0045A396A /* LabMidiPorts.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "LabMidiPorts.cpp"; path = "LabMidiPorts.cpp"; sourceTree = "<group>"; };
+		7B430996097575F564646F7B /* LabMidiPorts.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "LabMidiPorts.h"; path = "LabMidiPorts.h"; sourceTree = "<group>"; };
+		04004FEC11C86A1314E233D9 /* LabMidiSoftSynth.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "LabMidiSoftSynth.cpp"; path = "LabMidiSoftSynth.cpp"; sourceTree = "<group>"; };
+		02F32ADC77D141884C5434C6 /* LabMidiSoftSynth.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "LabMidiSoftSynth.h"; path = "LabMidiSoftSynth.h"; sourceTree = "<group>"; };
+		43A518FB07B663D27DBF0AC2 /* LabMidiSong.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "LabMidiSong.cpp"; path = "LabMidiSong.cpp"; sourceTree = "<group>"; };
+		797E5E8127C51932572A1AD3 /* LabMidiSong.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "LabMidiSong.h"; path = "LabMidiSong.h"; sourceTree = "<group>"; };
+		35F1229F17BA4BD455E2003E /* LabMidiSongPlayer.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "LabMidiSongPlayer.cpp"; path = "LabMidiSongPlayer.cpp"; sourceTree = "<group>"; };
+		5EF550756FBF1D6171187D9C /* LabMidiSongPlayer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "LabMidiSongPlayer.h"; path = "LabMidiSongPlayer.h"; sourceTree = "<group>"; };
+		170E2B8811650B0716D50C64 /* LabMidiUtil.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "LabMidiUtil.cpp"; path = "LabMidiUtil.cpp"; sourceTree = "<group>"; };
+		7DDB679918296349095C7D0A /* LabMidiUtil.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "LabMidiUtil.h"; path = "LabMidiUtil.h"; sourceTree = "<group>"; };
+		0D5E2B6C70E431F5507D6A33 /* RtError.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "RtError.h"; path = "RtError.h"; sourceTree = "<group>"; };
+		687377536CA429112032636F /* RtMidi.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; name = "RtMidi.cpp"; path = "RtMidi.cpp"; sourceTree = "<group>"; };
+		5816446146E9747F553C71AD /* RtMidi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "RtMidi.h"; path = "RtMidi.h"; sourceTree = "<group>"; };
+		6B6772290D554AB6173054AD /* libLabMidi.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libLabMidi.a"; path = "libLabMidi.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		3C60438712D1639952C3387A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1F4A5D186435760E4AAC11C8 /* LabMidi */ = {
+			isa = PBXGroup;
+			children = (
+				6E797045030626C37E6A17C6 /* LabMidi */,
+				19FE18F32D7F2BD5697F3F61 /* Products */,
+			);
+			name = "LabMidi";
+			sourceTree = "<group>";
+		};
+		6E797045030626C37E6A17C6 /* LabMidi */ = {
+			isa = PBXGroup;
+			children = (
+				55751230127E18DD56861B3C /* LabMidiCommand.cpp */,
+				5EE546D9575A01DE32266F25 /* LabMidiCommand.h */,
+				203E4CAA35B17B0A675C784B /* LabMidiEvent.cpp */,
+				120C69B451AD56F904C2089E /* LabMidiEvent.h */,
+				47870A733EF17D37625740DD /* LabMidiIn.cpp */,
+				7D2D3D2F70CA635860525FCC /* LabMidiIn.h */,
+				691E4D0943761685121D5E00 /* LabMidiMusicTheory.cpp */,
+				4634352931E279AA0FC56CE8 /* LabMidiMusicTheory.h */,
+				7AFF2F004D3835DB4FC345B0 /* LabMidiOut.cpp */,
+				6D5D35C20C167E3F5A3F0D70 /* LabMidiOut.h */,
+				626A4A525D624EE0045A396A /* LabMidiPorts.cpp */,
+				7B430996097575F564646F7B /* LabMidiPorts.h */,
+				04004FEC11C86A1314E233D9 /* LabMidiSoftSynth.cpp */,
+				02F32ADC77D141884C5434C6 /* LabMidiSoftSynth.h */,
+				43A518FB07B663D27DBF0AC2 /* LabMidiSong.cpp */,
+				797E5E8127C51932572A1AD3 /* LabMidiSong.h */,
+				35F1229F17BA4BD455E2003E /* LabMidiSongPlayer.cpp */,
+				5EF550756FBF1D6171187D9C /* LabMidiSongPlayer.h */,
+				170E2B8811650B0716D50C64 /* LabMidiUtil.cpp */,
+				7DDB679918296349095C7D0A /* LabMidiUtil.h */,
+				20BD00454BE14D7776ED5E9C /* rtmidi-1.0.15 */,
+			);
+			name = "LabMidi";
+			path = "LabMidi";
+			sourceTree = "<group>";
+		};
+		20BD00454BE14D7776ED5E9C /* rtmidi-1.0.15 */ = {
+			isa = PBXGroup;
+			children = (
+				0D5E2B6C70E431F5507D6A33 /* RtError.h */,
+				687377536CA429112032636F /* RtMidi.cpp */,
+				5816446146E9747F553C71AD /* RtMidi.h */,
+			);
+			name = "rtmidi-1.0.15";
+			path = "rtmidi-1.0.15";
+			sourceTree = "<group>";
+		};
+		19FE18F32D7F2BD5697F3F61 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				6B6772290D554AB6173054AD /* libLabMidi.a */,
+			);
+			name = "Products";
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		562C6FFD7E8F09141F443434 /* LabMidi */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0AAB1EA65EBD546360071091 /* Build configuration list for PBXNativeTarget "LabMidi" */;
+			buildPhases = (
+				35CA06A9603F58BA31753850 /* Resources */,
+				3647141848C524150A982BDE /* Sources */,
+				3C60438712D1639952C3387A /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "LabMidi";
+			productName = "LabMidi";
+			productReference = 6B6772290D554AB6173054AD /* libLabMidi.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "LabMidi" */;
+			compatibilityVersion = "Xcode 3.2";
+			hasScannedForEncodings = 1;
+			mainGroup = 1F4A5D186435760E4AAC11C8 /* LabMidi */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				562C6FFD7E8F09141F443434 /* libLabMidi.a */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		35CA06A9603F58BA31753850 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		3647141848C524150A982BDE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0E4E37F01B9F7C61710E6F72 /* LabMidiCommand.cpp in Sources */,
+				29B8209C7399715B12316521 /* LabMidiEvent.cpp in Sources */,
+				7C614D1D36943063529D436C /* LabMidiIn.cpp in Sources */,
+				57574937475A14B30DC85F60 /* LabMidiMusicTheory.cpp in Sources */,
+				54C41A66233046173EF42FBE /* LabMidiOut.cpp in Sources */,
+				63BC050D510F654933E474C4 /* LabMidiPorts.cpp in Sources */,
+				74AB0976422C061A48BC565B /* LabMidiSoftSynth.cpp in Sources */,
+				5ABB4D9D3214718629F3413C /* LabMidiSong.cpp in Sources */,
+				0E57056D5A6D51322BE202D6 /* LabMidiSongPlayer.cpp in Sources */,
+				228641595FFC4ADC5E607C83 /* LabMidiUtil.cpp in Sources */,
+				44E06FB961C554CD06FA37BC /* RtMidi.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		1DA223DA54E44E1776B37366 /* Debug Native 32-bit */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = build/Debug;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = "LabMidi";
+			};
+			name = "Debug Native 32-bit";
+		};
+		639D0D6C3AF14148784A6141 /* Debug Native 64-bit */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CONFIGURATION_BUILD_DIR = build/Debug;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = "LabMidi";
+			};
+			name = "Debug Native 64-bit";
+		};
+		3BDC06D25DF803F448466CBD /* Release Native 32-bit */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				CONFIGURATION_BUILD_DIR = build/Release;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = "LabMidi";
+			};
+			name = "Release Native 32-bit";
+		};
+		404D14997E59372A3C79532B /* Release Native 64-bit */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				CONFIGURATION_BUILD_DIR = build/Release;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/lib;
+				PRODUCT_NAME = "LabMidi";
+			};
+			name = "Release Native 64-bit";
+		};
+		64740F1732D3552B1B1674BA /* Debug Native 32-bit */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "i386";
+				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
+				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG",
+					"__MACOSX_CORE__",
+					"OSX",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				OBJROOT = "obj/x32/Debug";
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = (
+					"-std=c++11",
+					"-stdlib=libc++",
+				);
+				SYMROOT = "build/Debug";
+			};
+			name = "Debug Native 32-bit";
+		};
+		2B2D37E07C1D721414460F92 /* Debug Native 64-bit */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "x86_64";
+				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
+				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG",
+					"__MACOSX_CORE__",
+					"OSX",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				OBJROOT = "obj/x64/Debug";
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_CFLAGS = (
+					"-std=c++11",
+					"-stdlib=libc++",
+				);
+				SYMROOT = "build/Debug";
+			};
+			name = "Debug Native 64-bit";
+		};
+		2301253D4AE440D2534B1BCD /* Release Native 32-bit */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "i386";
+				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
+				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"NDEBUG",
+					"__MACOSX_CORE__",
+					"OSX",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				OBJROOT = "obj/x32/Release";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CFLAGS = (
+					"-std=c++11",
+					"-stdlib=libc++",
+				);
+				SYMROOT = "build/Release";
+			};
+			name = "Release Native 32-bit";
+		};
+		476A4121727102F336796D44 /* Release Native 64-bit */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "x86_64";
+				CONFIGURATION_BUILD_DIR = "$(SYMROOT)";
+				CONFIGURATION_TEMP_DIR = "$(OBJROOT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"NDEBUG",
+					"__MACOSX_CORE__",
+					"OSX",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				OBJROOT = "obj/x64/Release";
+				ONLY_ACTIVE_ARCH = NO;
+				OTHER_CFLAGS = (
+					"-std=c++11",
+					"-stdlib=libc++",
+				);
+				SYMROOT = "build/Release";
+			};
+			name = "Release Native 64-bit";
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0AAB1EA65EBD546360071091 /* Build configuration list for PBXNativeTarget "libLabMidi.a" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DA223DA54E44E1776B37366 /* Debug Native 32-bit */,
+				639D0D6C3AF14148784A6141 /* Debug Native 64-bit */,
+				3BDC06D25DF803F448466CBD /* Release Native 32-bit */,
+				404D14997E59372A3C79532B /* Release Native 64-bit */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Debug Native 32-bit";
+		};
+		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "LabMidi" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				64740F1732D3552B1B1674BA /* Debug Native 32-bit */,
+				2B2D37E07C1D721414460F92 /* Debug Native 64-bit */,
+				2301253D4AE440D2534B1BCD /* Release Native 32-bit */,
+				476A4121727102F336796D44 /* Release Native 64-bit */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = "Debug Native 32-bit";
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}
