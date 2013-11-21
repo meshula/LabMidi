@@ -126,16 +126,18 @@ namespace Lab {
             // if the user supplies a sound bank, we'll set that before we initialize and start playing
             if (bankPath)
             {
-                FSRef fsRef;
-                require_noerr (result = FSPathMakeRef ((const UInt8*)bankPath, &fsRef, 0), home);
-                
-                printf ("Setting Sound Bank:%s\n", bankPath);
-                
-                require_noerr (result = AudioUnitSetProperty(synthUnit,
-                                                             kMusicDeviceProperty_SoundBankFSRef,
-                                                             kAudioUnitScope_Global, 0,
-                                                             &fsRef, sizeof(fsRef)), home);
-                
+                // note: bankpath is a soundfont
+                CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (const UInt8 *)bankPath, strlen(bankPath), false);
+
+                if (url) {
+                    require_noerr (result = AudioUnitSetProperty(synthUnit,
+                                                                 kMusicDeviceProperty_SoundBankURL, kAudioUnitScope_Global,
+                                                                 0,
+                                                                 &url, sizeof(url)
+                                                                 ), home);
+
+                    CFRelease(url);
+                }
             }
             
             // ok we're set up to go - initialize and start the graph

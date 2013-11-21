@@ -250,8 +250,7 @@ namespace Lab {
         static bool keys[12] = {w,b,w,b,w,w,b,w,b,w,b,w};
         return keys;
     }
-    
-    
+
     /*
      A port to C++ of an implementation of the Bjorklund algorithm as implemented in JavaScript 
      by Jack Rutherford.
