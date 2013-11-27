@@ -15,4 +15,6 @@
 # XCode stuff
 *.hmap
 *.xcuserstate
+
+src/LabMidi.xcodeproj/xcuserdata/
 src/obj/

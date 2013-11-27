@@ -100,9 +100,15 @@ namespace Lab {
         return _detail->openPort(port);
     }
 
-    void MidiOut::createVirtualPort(const std::string& _port)
+    bool MidiOut::createVirtualPort(const std::string& _port)
     {
-        _detail->midiOut->openVirtualPort(_port);
+        try {
+            _detail->midiOut->openVirtualPort(_port);
+        }
+        catch(const RtError& exc) {
+            return false;
+        }
+        return true;
     }
 
     void MidiOut::closePort()

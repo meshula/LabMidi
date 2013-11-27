@@ -66,7 +66,7 @@ namespace Lab {
             while (eventCursor < events.size() && events[eventCursor].time <= newTime) {
 
                 MidiRtEvent& ev = events[eventCursor];
-                
+
                 for (auto i = callbacks.begin(); i != callbacks.end(); ++i)
                     (*i).second((*i).first, &ev);
                 

@@ -52,10 +52,17 @@ namespace Lab {
 
         void setVerbose(bool verbose);
         
-        // createVirtualPort is available on MacOSX and ALSA for allowing other software to connect
-        void createVirtualPort(const std::string& port);
+        // [OSX and ALSA] createVirtualPort creates a software MIDI port that
+        // other software can connect to. portName is the user facing name that
+        // will appear if MIDI devices are enumerated.
+        //
+        bool createVirtualPort(const std::string& portName);
 
+        // Opens a numbered midi port corresponding to a MIDI source available
+        // on the MIDI system.
+        //
         bool openPort(unsigned int port);
+
         void closePort();
         unsigned int getPort() const;
         

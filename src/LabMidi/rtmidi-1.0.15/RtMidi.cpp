@@ -258,7 +258,7 @@ void midiInputCallback( const MIDIPacketList *list, void *procRef, void *srcRef 
             data->queue.size++;
           }
           else
-            std::cerr << "\nRtMidiIn: message queue limit reached!!\n\n";
+            std::cerr << "\nRtMidiIn [" << __LINE__ << "]: message queue limit reached!!\n\n";
         }
         message.bytes.clear();
       }
@@ -322,7 +322,7 @@ void midiInputCallback( const MIDIPacketList *list, void *procRef, void *srcRef 
                 data->queue.size++;
               }
               else
-                std::cerr << "\nRtMidiIn: message queue limit reached!!\n\n";
+                  std::cerr << "\nRtMidiIn [" << __LINE__ << "]: message queue limit reached!!\n\n";
             }
             message.bytes.clear();
           }
@@ -1042,7 +1042,7 @@ extern "C" void *alsaMidiHandler( void *ptr )
         data->queue.size++;
       }
       else
-        std::cerr << "\nRtMidiIn: message queue limit reached!!\n\n";
+          std::cerr << "\nRtMidiIn [" << __LINE__ << "]: message queue limit reached!!\n\n";
     }
   }
 
@@ -1653,7 +1653,7 @@ extern "C" void *irixMidiHandler( void *ptr )
                 data->queue.size++;
               }
               else
-                std::cerr << "\nRtMidiIn: message queue limit reached!!\n\n";
+                  std::cerr << "\nRtMidiIn [" << __LINE__ << "]: message queue limit reached!!\n\n";
             }
             message.bytes.clear();
           }
@@ -1700,7 +1700,7 @@ extern "C" void *irixMidiHandler( void *ptr )
           data->queue.size++;
         }
         else
-          std::cerr << "\nRtMidiIn: message queue limit reached!!\n\n";
+            std::cerr << "\nRtMidiIn [" << __LINE__ << "]: message queue limit reached!!\n\n";
       }
       message.bytes.clear();
     }
@@ -2090,7 +2090,7 @@ static void CALLBACK midiInputCallback( HMIDIIN hmin,
       data->queue.size++;
     }
     else
-      std::cerr << "\nRtMidiIn: message queue limit reached!!\n\n";
+        std::cerr << "\nRtMidiIn [" << __LINE__ << "]: message queue limit reached!!\n\n";
   }
 
   // Clear the vector for the next input message.
@@ -2524,7 +2524,7 @@ int jackProcessIn( jack_nframes_t nframes, void *arg )
         rtData->queue.size++;
       }
       else
-        std::cerr << "\nRtMidiIn: message queue limit reached!!\n\n";
+          std::cerr << "\nRtMidiIn [" << __LINE__ << "]: message queue limit reached!!\n\n";
     }
   }
 

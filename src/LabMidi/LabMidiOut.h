@@ -54,7 +54,7 @@ namespace Lab {
         virtual ~MidiOut();
         
         // createVirtualPort is available on MacOSX and ALSA for allowing other software to connect
-        void createVirtualPort(const std::string& port);
+        bool createVirtualPort(const std::string& port);
         
         bool openPort(unsigned int port);
         void closePort();

@@ -91,9 +91,16 @@ namespace Lab {
             port = -1;
         }
         
-        void createVirtualPort(const std::string& port)
+        bool createVirtualPort(const std::string& port)
         {
-            midiIn->openVirtualPort(port);
+            try {
+                midiIn->openVirtualPort(port);
+                midiIn->setCallback(&midiInCallback, this);
+            }
+            catch(const RtError& exc) {
+                return false;
+            }
+            return true;
         }
         
         // RtMidi compatible callback function
@@ -147,9 +154,9 @@ namespace Lab {
         return _detail->openPort(port);
     }
 
-    void MidiIn::createVirtualPort(const std::string& port)
+    bool MidiIn::createVirtualPort(const std::string& port)
     {
-        _detail->createVirtualPort(port);
+        return _detail->createVirtualPort(port);
     }
 
     unsigned int MidiIn::getPort() const

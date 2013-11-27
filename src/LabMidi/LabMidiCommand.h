@@ -37,15 +37,19 @@ namespace Lab {
     
     /*
      http://www.midi.org/techspecs/midimessages.php
-     Command Meaning	 # parameters	 param 1	 param 2
-     0x80	 Note-off	 2	 key	 velocity
-     0x90	 Note-on	 2	 key	 velocity
-     0xA0	 Aftertouch	 2	 key	 touch
-     0xB0	 Continuous controller (pedals, levers, etc)	 2	 controller #	 controller value
-     0xC0	 Patch change	 2	 instrument #
-     0xD0	 Channel Pressure	 1	 pressure
-     0xE0	 Pitch bend (center is 0x2000)	 2	 lsb (7 bits)	 msb (7 bits)
+     Command Meaning            # parameters    param 1         param 2
+     0x8c	 Note-off           2               key             velocity
+     0x9c	 Note-on            2               key             velocity
+     0xAc	 Aftertouch         2               key             touch
+     0xBc	 Continuous controller (pedals, levers, etc)
+                                2               controller #    controller value
+     0xCc	 Patch change       2               instrument #
+     0xDc	 Channel Pressure   1               pressure
+     0xEc	 Pitch bend (center is 0x2000)
+                                2               lsb (7 bits)    msb (7 bits)
      
+     where c is the channel number
+
      0xF0     0iiiiiii (7 bit manufacturer ID) 0ddddddd (message, listened to if iiiiiii corresponds to receiving device)
      0xF1     0nnndddd Time code quarter frame. nnn = message type, dddd = values
      0xF2     0iiiiiii LSB of 14 bit song position pointer, 0mmmmmmm MSB of 14 bit song position pointer
@@ -84,15 +88,18 @@ namespace Lab {
     #define MIDI_SYSTEM_RESET       0xFF
 
     struct MidiCommand {
-        
-        MidiCommand& operator=(const MidiCommand& rhs)
-        {
+        MidiCommand() { }
+        MidiCommand(uint8_t command, uint8_t byte1, uint8_t byte2)
+        : command(command), byte1(byte1), byte2(byte2) { }
+        MidiCommand(const MidiCommand& rhs) {
+            *this = rhs;
+        }
+        MidiCommand& operator=(const MidiCommand& rhs) {
             command = rhs.command;
             byte1 = rhs.byte1;
             byte2 = rhs.byte2;
             return *this;
         }
-
         uint8_t command;
         uint8_t byte1;
         uint8_t byte2;
