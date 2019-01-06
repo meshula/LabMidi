@@ -28,7 +28,7 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "LabMidiCommand.h"
+#include "LabMidi/Command.h"
 
 namespace Lab {
     

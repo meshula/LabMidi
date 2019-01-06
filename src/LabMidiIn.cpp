@@ -29,8 +29,8 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "LabMidiIn.h"
-#include "LabMidiCommand.h"
+#include "LabMidi/In.h"
+#include "LabMidi/Command.h"
 
 #include "RtMidi.h"
 #include <iostream>
@@ -91,13 +91,13 @@ namespace Lab {
             port = -1;
         }
         
-        bool createVirtualPort(const std::string& port)
+        bool createVirtualPort(const std::string& port) noexcept
         {
             try {
                 midiIn->openVirtualPort(port);
                 midiIn->setCallback(&midiInCallback, this);
             }
-            catch(const RtError& exc) {
+            catch(const RtError&) {
                 return false;
             }
             return true;
@@ -106,7 +106,7 @@ namespace Lab {
         // RtMidi compatible callback function
         void manageNewMessage(double deltatime, std::vector<unsigned char>* message)
         {
-            unsigned int nBytes = message->size();
+            size_t nBytes = message->size();
             if (verbose) {
                 std::cout << "num bytes: " << nBytes;
                 for (unsigned int i = 0; i < nBytes; i++)
@@ -154,7 +154,7 @@ namespace Lab {
         return _detail->openPort(port);
     }
 
-    bool MidiIn::createVirtualPort(const std::string& port)
+    bool MidiIn::createVirtualPort(const std::string& port) noexcept
     {
         return _detail->createVirtualPort(port);
     }

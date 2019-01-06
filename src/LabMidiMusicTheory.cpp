@@ -31,7 +31,7 @@
 
 
 
-#include "LabMidiMusicTheory.h"
+#include "LabMidi/MusicTheory.h"
 #include <stdint.h>
 
 namespace Lab {

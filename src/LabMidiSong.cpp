@@ -104,9 +104,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "LabMidiSong.h"
+#include "LabMidi/Song.h"
 
-#include "LabMidiCommand.h"
+#include "LabMidi/Command.h"
 
 #include <iostream>
 #include <math.h>
@@ -398,7 +398,7 @@ namespace Lab {
      **
      ** decode a base64 encoded stream discarding padding, line breaks and noise
      */
-    void decode64(uint8_t const* infile, uint8_t* outfile, int filelen)
+    void decode64(uint8_t const* infile, uint8_t* outfile, size_t filelen)
     {
         unsigned char in[4], out[3], v;
         int i, len;
@@ -445,7 +445,7 @@ namespace Lab {
         // https://github.com/qiao/euphony
         //
         const char* base64Test = "data:audio/midi;base64,";
-        int base64TestLen = strlen(base64Test);
+        size_t base64TestLen = strlen(base64Test);
         if (!strncmp((const char*) file, base64Test, base64TestLen)) {
             b = new uint8_t[length];
             decode64(a + base64TestLen, b, length - base64TestLen);
@@ -701,7 +701,7 @@ namespace Lab {
             case 'c':
             case 'C': {
                 int note = 0 + sharpFlat(curr) + octave * 12;
-                int duration = dotted(curr, tempo, ticksPerBeat, len);
+                int duration = dotted(curr, tempo, static_cast<int>(ticksPerBeat), len);
                 // note output { tr, cnt, size 3, 0x90|tr note & 0x7f vol=0x7f }
                 if (!tied) {
                     storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
@@ -718,7 +718,7 @@ namespace Lab {
             case 'd':
             case 'D': {
                 int note = 2 + sharpFlat(curr) + octave * 12;
-                int duration = dotted(curr, tempo, ticksPerBeat, len);
+                int duration = dotted(curr, tempo, static_cast<int>(ticksPerBeat), len);
                 // note output { tr, cnt, size 3, 0x90|tr note & 0x7f vol=0x7f }
                 if (!tied) {
                     storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
@@ -735,7 +735,7 @@ namespace Lab {
             case 'e':
             case 'E': {
                 int note = 4 + sharpFlat(curr) + octave * 12;
-                int duration = dotted(curr, tempo, ticksPerBeat, len);
+                int duration = dotted(curr, tempo, static_cast<int>(ticksPerBeat), len);
                 // note output { tr, cnt, size 3, 0x90|tr note & 0x7f vol=0x7f }
                 if (!tied) {
                     storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
@@ -752,7 +752,7 @@ namespace Lab {
             case 'f':
             case 'F': {
                 int note = 5 + sharpFlat(curr) + octave * 12;
-                int duration = dotted(curr, tempo, ticksPerBeat, len);
+                int duration = dotted(curr, tempo, static_cast<int>(ticksPerBeat), len);
                 // note output { tr, cnt, size 3, 0x90|tr note & 0x7f vol=0x7f }
                 if (!tied) {
                     storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
@@ -769,7 +769,7 @@ namespace Lab {
             case 'g':
             case 'G': {
                 int note = 7 + sharpFlat(curr) + octave * 12;
-                int duration = dotted(curr, tempo, ticksPerBeat, len);
+                int duration = dotted(curr, tempo, static_cast<int>(ticksPerBeat), len);
                 // note output { tr, cnt, size 3, 0x90|tr note & 0x7f vol=0x7f }
                 if (!tied) {
                     storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
@@ -786,7 +786,7 @@ namespace Lab {
             case 'a':
             case 'A': {
                 int note = 9 + sharpFlat(curr) + octave * 12;
-                int duration = dotted(curr, tempo, ticksPerBeat, len);
+                int duration = dotted(curr, tempo, static_cast<int>(ticksPerBeat), len);
                 // note output { tr, cnt, size 3, 0x90|tr note & 0x7f vol=0x7f }
                 if (!tied) {
                     storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
@@ -803,7 +803,7 @@ namespace Lab {
             case 'b':
             case 'B': {
                 int note = 11 + sharpFlat(curr) + octave * 12;
-                int duration = dotted(curr, tempo, ticksPerBeat, len);
+                int duration = dotted(curr, tempo, static_cast<int>(ticksPerBeat), len);
                 // note output { tr, cnt, size 3, 0x90|tr note & 0x7f vol=0x7f }
                 if (!tied) {
                     storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
@@ -824,7 +824,7 @@ namespace Lab {
                 
             case 'r': // rest
             case 'R':
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, 0, 0, dotted(curr, tempo, ticksPerBeat, len));
+                storeMMLEvent(track, MIDI_NOTE_ON | tr, 0, 0, dotted(curr, tempo, static_cast<int>(ticksPerBeat), len));
                 tied = false;
                 break;
                 

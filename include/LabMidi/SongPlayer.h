@@ -1,8 +1,7 @@
 //
-//  LabMidiIn.h
+//  LabMidiSongPlayer.h
 //
-//  CoreAudio, CoreMidi, and CoreFoundation frameworks are required on OSX/iOS
-//
+
 /*
  Copyright (c) 2012, Nick Porcino
  All rights reserved.
@@ -32,47 +31,33 @@
 
 #pragma once
 
-#include <string>
-#include <vector>
-
-class RtMidiIn;
+#include "LabMidi/Event.h"
 
 namespace Lab {
+
+    class MidiSong;
     
-    struct MidiCommand;
+    struct MidiRtEvent;
     
-    typedef void (*MidiCallbackFn)(void* userData, MidiCommand*);
+    typedef void (*MidiEventCallbackFn)(void* userData, MidiRtEvent*);
     
-    //----------------------------------------------------------------------------
-    
-    class MidiIn {
+    class MidiSongPlayer {
     public:
-        MidiIn();
-        ~MidiIn();
-
-        void setVerbose(bool verbose);
+        MidiSongPlayer(MidiSong*);
+        ~MidiSongPlayer();
         
-        // [OSX and ALSA] createVirtualPort creates a software MIDI port that
-        // other software can connect to. portName is the user facing name that
-        // will appear if MIDI devices are enumerated.
-        //
-        bool createVirtualPort(const std::string& portName);
-
-        // Opens a numbered midi port corresponding to a MIDI source available
-        // on the MIDI system.
-        //
-        bool openPort(unsigned int port);
-
-        void closePort();
-        unsigned int getPort() const;
+        void play(float wallClockTime);
+        void update(float wallClockTime);
         
-        void addCallback(MidiCallbackFn, void* userData);
+        float length() const; // length of the contained song
+        
+        void addCallback(MidiEventCallbackFn, void* userData);
         void removeCallback(void* userData);
         
     private:
         class Detail;
         Detail* _detail;
     };
-    
+
 } // Lab
-    
+

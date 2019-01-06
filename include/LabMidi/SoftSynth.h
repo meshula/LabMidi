@@ -1,5 +1,8 @@
 //
-//  LabMidiEvent.h
+//  LabMidiSoftSynth.h
+//
+//  CoreAudio, CoreMidi, and CoreFoundation frameworks are required on OSX/iOS
+//
 //
 
 /*
@@ -31,32 +34,27 @@
 
 #pragma once
 
-#include "LabMidiCommand.h"
+#include "LabMidi/Out.h"
+#include "LabMidi/Event.h"
 
 namespace Lab {
     
-    struct MidiRtEvent
-    {
-        MidiRtEvent(float t, uint8_t b1, uint8_t b2, uint8_t b3)
-        : time(t)
-        {
-            command.command = b1;
-            command.byte1 = b2;
-            command.byte2 = b3;
-        }
+    struct MidiCommand;
+
+    class MidiSoftSynth : public MidiOutBase {
+    public:
+        MidiSoftSynth();
+        ~MidiSoftSynth();
         
-        MidiRtEvent& operator=(const MidiRtEvent& rhs)
-        {
-            time = rhs.time;
-            command = rhs.command;
-            return *this;
-        }
+        void initialize(int midiChannel, char const*const bankPath);
+        virtual void command(const MidiCommand*);
         
-        float time;
-        MidiCommand command;
+        // user data will be a MidiSoftSynth pointer
+        static void playerCallback(void* userData, MidiRtEvent*);
+        
+    private:
+        class Detail;
+        Detail* _detail;
     };
     
 } // Lab
-
-
-

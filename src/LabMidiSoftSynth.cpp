@@ -29,8 +29,8 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "LabMidiSoftSynth.h"
-#include "LabMidiCommand.h"
+#include "LabMidi/SoftSynth.h"
+#include "LabMidi/Command.h"
 
 #if defined(__MACOSX_CORE__)
 
@@ -194,7 +194,7 @@ namespace Lab {
     {
     public:
         void start(int midiChannel, char const*const bankPath) { }
-        void command(MidiCommand*) { }
+        void command(const MidiCommand*) { }
     };
     
 #else
@@ -203,7 +203,7 @@ namespace Lab {
     {
     public:
         void start(int midiChannel, char const*const bankPath) { }
-        void command(MidiCommand*) { }
+        void command(const MidiCommand*) { }
     };
     
 #endif

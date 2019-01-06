@@ -29,8 +29,8 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "LabMidiCommand.h"
-#include "LabMidiOut.h"
+#include "LabMidi/Command.h"
+#include "LabMidi/Out.h"
 
 #include "RtMidi.h"
 
@@ -100,12 +100,12 @@ namespace Lab {
         return _detail->openPort(port);
     }
 
-    bool MidiOut::createVirtualPort(const std::string& _port)
+    bool MidiOut::createVirtualPort(const std::string& _port) noexcept
     {
         try {
             _detail->midiOut->openVirtualPort(_port);
         }
-        catch(const RtError& exc) {
+        catch(const RtError&) {
             return false;
         }
         return true;

@@ -30,7 +30,7 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "LabMidiPorts.h"
+#include "LabMidi/Ports.h"
 #include "RtMidi.h"
 
 namespace Lab {

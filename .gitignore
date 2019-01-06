@@ -16,5 +16,10 @@
 *.hmap
 *.xcuserstate
 
+# Vim stuff
+*.swp
+
 src/LabMidi.xcodeproj/xcuserdata/
 src/obj/
+build/
+

@@ -29,7 +29,7 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "LabMidiEvent.h"
+#include "LabMidi/Event.h"
 
 namespace Lab {
     

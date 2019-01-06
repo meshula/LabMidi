@@ -29,16 +29,12 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "LabMidiSongPlayer.h"
+#include "LabMidi/SongPlayer.h"
+#include "LabMidi/Command.h"
+#include "LabMidi/Event.h"
+#include "LabMidi/Song.h"
+#include "LabMidi/Util.h"
 
-#include "LabMidiCommand.h"
-#include "LabMidiEvent.h"
-
-#include "LabMidiSong.h"
-
-#include "LabMidiUtil.h"
-
-#include <alloca.h>
 #include <stdint.h>
 
 namespace Lab {
@@ -117,7 +113,7 @@ namespace Lab {
     {
         if (s && s->tracks) {
             std::vector<MidiTrack*>& tracks = *(s->tracks);
-            int tc = tracks.size();
+            size_t tc = tracks.size();
             
             // double, because don't want to introduce sync slip during rendering
             double* nextTime = (double*) alloca(sizeof(double) * tc);
@@ -126,7 +122,7 @@ namespace Lab {
             int i = 0;
             for (auto t = s->tracks->begin(); t != s->tracks->end(); ++t, ++i) {
                 MidiTrack& track = *(*t);
-                int ec = track.events.size();
+                size_t ec = track.events.size();
                 nextTime[i] = ec ? track.events[0]->deltatime : std::numeric_limits<double>::max();
                 nextIndex[i] = ec ? 0 : -1;
             }

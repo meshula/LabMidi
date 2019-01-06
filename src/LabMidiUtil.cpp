@@ -30,7 +30,7 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "LabMidiUtil.h"
+#include "LabMidi/Util.h"
 
 #include <ctype.h>
 #include <math.h>

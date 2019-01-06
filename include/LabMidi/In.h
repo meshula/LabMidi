@@ -1,10 +1,8 @@
 //
-//  LabMidiSoftSynth.h
+//  LabMidiIn.h
 //
 //  CoreAudio, CoreMidi, and CoreFoundation frameworks are required on OSX/iOS
 //
-//
-
 /*
  Copyright (c) 2012, Nick Porcino
  All rights reserved.
@@ -34,23 +32,42 @@
 
 #pragma once
 
-#include "LabMidiOut.h"
-#include "LabMidiEvent.h"
+#include <string>
+#include <vector>
+
+class RtMidiIn;
 
 namespace Lab {
     
     struct MidiCommand;
-
-    class MidiSoftSynth : public MidiOutBase {
+    
+    typedef void (*MidiCallbackFn)(void* userData, MidiCommand*);
+    
+    //----------------------------------------------------------------------------
+    
+    class MidiIn {
     public:
-        MidiSoftSynth();
-        ~MidiSoftSynth();
+        MidiIn();
+        ~MidiIn();
+
+        void setVerbose(bool verbose);
         
-        void initialize(int midiChannel, char const*const bankPath);
-        virtual void command(const MidiCommand*);
+        // [OSX and ALSA] createVirtualPort creates a software MIDI port that
+        // other software can connect to. portName is the user facing name that
+        // will appear if MIDI devices are enumerated.
+        //
+        bool createVirtualPort(const std::string& portName) noexcept;
+
+        // Opens a numbered midi port corresponding to a MIDI source available
+        // on the MIDI system.
+        //
+        bool openPort(unsigned int port);
+
+        void closePort();
+        unsigned int getPort() const;
         
-        // user data will be a MidiSoftSynth pointer
-        static void playerCallback(void* userData, MidiRtEvent*);
+        void addCallback(MidiCallbackFn, void* userData);
+        void removeCallback(void* userData);
         
     private:
         class Detail;
@@ -58,3 +75,4 @@ namespace Lab {
     };
     
 } // Lab
+    
