@@ -697,7 +697,7 @@ bool OptionParser::Parse(int argc, char** argv)
         ArgType argType;
         if (argv[i][0] == '-')
         {
-            int arglength = strlen(argv[i]);
+            size_t arglength = strlen(argv[i]);
             argType = argv[i][1] == '-' ? longArg : shortArg;
             if ((argType == shortArg && arglength == 1) ||
                 (argType == longArg && arglength == 2))

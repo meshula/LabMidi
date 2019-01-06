@@ -37,14 +37,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include "MidiPlayerApp.h"
 #include "OptionParser.h"
 
-#include "LabMidi/LabMidiCommand.h"
-#include "LabMidi/LabMidiIn.h"
-#include "LabMidi/LabMidiOut.h"
-#include "LabMidi/LabMidiPorts.h"
-#include "LabMidi/LabMidiSoftSynth.h"
-#include "LabMidi/LabMidiSong.h"
-#include "LabMidi/LabMidiSongPlayer.h"
-#include "LabMidi/LabMidiUtil.h"
+#include "LabMidi/Command.h"
+#include "LabMidi/In.h"
+#include "LabMidi/Out.h"
+#include "LabMidi/Ports.h"
+#include "LabMidi/SoftSynth.h"
+#include "LabMidi/Song.h"
+#include "LabMidi/SongPlayer.h"
+#include "LabMidi/Util.h"
 
 #include <iostream>
 
@@ -67,12 +67,12 @@ public:
     , midiSongPlayer(0)
     {
     }
-    
+
     ~Detail()
     {
         delete midiPorts;
     }
-    
+
     void listPorts()
     {
         midiPorts->refreshPortList();
@@ -85,7 +85,7 @@ public:
                 std::cout << "   " << i << ": " << midiPorts->inPort(i) << std::endl;
             std::cout << std::endl;
         }
-        
+
         c = midiPorts->outPorts();
         if (c == 0)
             std::cout << "No MIDI output ports found" << std::endl;
@@ -125,7 +125,7 @@ double MidiPlayerApp::getElapsedSeconds()
         LARGE_INTEGER lFreq;
         QueryPerformanceFrequency(&lFreq);
         freq = double(lFreq.QuadPart);
-        QueryPerformanceCounter(&lStart);
+        QueryPerformanceCounter(&start);
         init = false;
     }
     LARGE_INTEGER now;
@@ -144,21 +144,21 @@ void MidiPlayerApp::setup()
 
 void MidiPlayerApp::update(double t)
 {
-    _detail->midiSongPlayer->update(t);
+    _detail->midiSongPlayer->update(static_cast<float>(t));
 }
 
 bool MidiPlayerApp::running(double t)
 {
     if (!_detail->midiSongPlayer)
         return false;
-    
+
     return t <= (_detail->midiSongPlayer->length() + 0.5f);
 }
 
 int main(int argc, char** argv)
 {
     MidiPlayerApp app;
-    
+
     OptionParser op("MidiPlayer");
     int port = -1;
     std::string path;
@@ -175,9 +175,9 @@ int main(int argc, char** argv)
             app._detail->midiSongPlayer = new Lab::MidiSongPlayer(midiSong);
             app._detail->midiSongPlayer->addCallback(Lab::MidiOut::playerCallback, midiOut);
             app._detail->midiSongPlayer->play(0);
-            
+
             double startTime = app.getElapsedSeconds();
-            
+
             while (app.running(app.getElapsedSeconds() - startTime)) {
                 #ifdef _MSC_VER
                 Sleep(1); // 1ms delay --- to do - shouldn't sleep this long
@@ -189,7 +189,7 @@ int main(int argc, char** argv)
             delete midiOut;
         }
     }
-    
+
     return 1;
 }
 

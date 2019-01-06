@@ -36,14 +36,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "MidiApp.h"
 
-#include "LabMidi/LabMidiCommand.h"
-#include "LabMidi/LabMidiIn.h"
-#include "LabMidi/LabMidiOut.h"
-#include "LabMidi/LabMidiPorts.h"
-#include "LabMidi/LabMidiSoftSynth.h"
-#include "LabMidi/LabMidiSong.h"
-#include "LabMidi/LabMidiSongPlayer.h"
-#include "LabMidi/LabMidiUtil.h"
+#include "LabMidi/Command.h"
+#include "LabMidi/In.h"
+#include "LabMidi/Out.h"
+#include "LabMidi/Ports.h"
+#include "LabMidi/SoftSynth.h"
+#include "LabMidi/Song.h"
+#include "LabMidi/SongPlayer.h"
+#include "LabMidi/Util.h"
 
 #include <iostream>
 
@@ -61,7 +61,7 @@ void midiPrintCallback(void* userData, Lab::MidiCommand* c)
     if (c) {
         std::cout << Lab::commandName(c->command) << " "
                   << Lab::noteName(c->byte1) << " ";
-        
+
         if (c->command <= 0x9f)
             std::cout << "vel: ";
 
@@ -76,20 +76,20 @@ class TestMidi
 {
 public:
     virtual ~TestMidi() { }
-    
+
     virtual void update(float t) = 0;
     virtual bool running(float t) = 0;
 };
 
 /*
     TestInOut sets up the following scenario:
- 
+
     song.mid -> midiOut(0)
     midiIn(1) -> softSynth
- 
+
     If you set up an external program to listen to 0
     and echo through to 1, the softsynth will play the song.mid file
- 
+
  */
 
 class TestInOut : public TestMidi
@@ -105,14 +105,14 @@ public:
         midiOut->createVirtualPort("MidiApp Demo Out Port");
         midiIn->openPort(0);
         midiSoftSynth->initialize(1, 0);
-        
+
         midiSong = new Lab::MidiSong();
         midiSong->parse("resources/minute_waltz.mid", true);
         midiSongPlayer = new Lab::MidiSongPlayer(midiSong);
         midiSongPlayer->addCallback(Lab::MidiOut::playerCallback, midiOut);
         midiSongPlayer->play(0);
     }
-    
+
     virtual ~TestInOut()
     {
         delete midiIn;
@@ -121,17 +121,17 @@ public:
         delete midiSong;
         delete midiSoftSynth;
     }
-    
+
     virtual void update(float t)
     {
         midiSongPlayer->update(t);
     }
-    
+
     virtual bool running(float t)
     {
         return t <= (midiSongPlayer->length() + 0.5f);
     }
-    
+
     static void midiSoftSynthPlayCallback(void* userData, Lab::MidiCommand* c)
     {
         if (userData && c) {
@@ -140,7 +140,7 @@ public:
             s->command(c);
         }
     }
-    
+
     Lab::MidiIn*         midiIn;
     Lab::MidiOut*        midiOut;
     Lab::MidiSoftSynth*  midiSoftSynth;
@@ -151,9 +151,9 @@ public:
 
 /*
  TestSoftSynth sets up the following scenario:
- 
+
  song.mid -> softSynth
- 
+
  */
 
 class TestSoftSynth : public TestMidi
@@ -170,33 +170,33 @@ public:
             midiSong->parseMML(path, strlen(path), true);
         else
             midiSong->parse(path, true);
-        
+
         midiSongPlayer = new Lab::MidiSongPlayer(midiSong);
         midiSongPlayer->addCallback(Lab::MidiSoftSynth::playerCallback, midiSoftSynth);
         midiSongPlayer->play(0);
     }
-    
+
     virtual ~TestSoftSynth()
     {
         delete midiSongPlayer;
         delete midiSong;
         delete midiSoftSynth;
     }
-    
+
     virtual void update(float t)
     {
         if (midiSongPlayer)
             midiSongPlayer->update(t);
     }
-    
+
     virtual bool running(float t)
     {
         if (!midiSongPlayer)
             return false;
-        
+
         return t <= (midiSongPlayer->length() + 0.5f);
     }
-    
+
     Lab::MidiSoftSynth*  midiSoftSynth;
     Lab::MidiSong*       midiSong;
     Lab::MidiSongPlayer* midiSongPlayer;
@@ -217,7 +217,7 @@ public:
                       << std::endl;
         }
     }
-    
+
     virtual void update(float) { }
     virtual bool running(float) { return false; }
 };
@@ -230,12 +230,12 @@ public:
     : midiPorts(new Lab::MidiPorts())
     {
     }
-    
+
     ~Detail()
     {
         delete midiPorts;
     }
-    
+
     void listPorts()
     {
         midiPorts->refreshPortList();
@@ -248,7 +248,7 @@ public:
                 std::cout << "   " << i << ": " << midiPorts->inPort(i) << std::endl;
             std::cout << std::endl;
         }
-        
+
         c = midiPorts->outPorts();
         if (c == 0)
             std::cout << "No MIDI output ports found" << std::endl;
@@ -262,7 +262,7 @@ public:
 
     Lab::MidiPorts* midiPorts;
     double startTime;
-    
+
     TestMidi* testMidi;
 };
 
@@ -284,7 +284,7 @@ MidiApp::MidiApp()
         case 4: _detail->testMidi = new TestFrequencyCalc(); break;
         case 5: _detail->testMidi = new TestSoftSynth("resources/106-Grieg - In the Hall of the Mountain King (Peer Gynt)"); break;
     }
-    
+
     _detail->startTime = getElapsedSeconds();
     _detail->listPorts();
 }
@@ -305,7 +305,7 @@ double MidiApp::getElapsedSeconds()
         LARGE_INTEGER lFreq;
         QueryPerformanceFrequency(&lFreq);
         freq = double(lFreq.QuadPart);
-        QueryPerformanceCounter(&lStart);
+        QueryPerformanceCounter(&start);
         init = false;
     }
     LARGE_INTEGER now;
@@ -335,7 +335,7 @@ bool MidiApp::running()
 int main(int argc, char** argv)
 {
     MidiApp* app = new MidiApp();
-    
+
     while (app->running()) {
 #ifdef _MSC_VER
         Sleep(1); // 1ms delay --- to do - shouldn't sleep this long
@@ -344,7 +344,7 @@ int main(int argc, char** argv)
 #endif
         app->update();
     }
-    
+
     delete app;
     return 1;
 }

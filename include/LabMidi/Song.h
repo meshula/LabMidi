@@ -85,10 +85,10 @@ namespace Lab {
         MidiSong();
         ~MidiSong();
         
-        void parse(uint8_t const*const midifiledata, int length, bool verbose);
+        void parse(uint8_t const*const midifiledata, size_t length, bool verbose);
         void parse(char const*const midifilePath, bool verbose);
         
-        void parseMML(char const*const mmlStr, int length, bool verbose);
+        void parseMML(char const*const mmlStr, size_t length, bool verbose);
         void parseMML(char const*const midifilePath, bool verbose);
 
         void clearTracks();

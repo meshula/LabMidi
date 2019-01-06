@@ -435,7 +435,7 @@ namespace Lab {
     }
     
     
-    void MidiSong::parse(uint8_t const*const a, int length, bool verbose)
+    void MidiSong::parse(uint8_t const*const a, size_t length, bool verbose)
     {
         uint8_t const* file = a;
         uint8_t* b = 0;
@@ -619,7 +619,7 @@ namespace Lab {
     // sample MML from http://www.g200kg.com/en/docs/webmodular/
     // t150 e-d-<g-4>g-rg-4e-d-<g-4>g-rg-4e-d-<g-4>g-4<e-4>g-4<d-4>frf4e-d-<d-4>frf4e-d-<d-4>frf4e-d-<d-4>f4<e-4>f4<g-4>g-rg-4
     
-    void MidiSong::parseMML(char const*const mmlStr, int length, bool verbose)
+    void MidiSong::parseMML(char const*const mmlStr, size_t length, bool verbose)
     {
         char const* curr = mmlStr;
         char const* end = mmlStr + length;

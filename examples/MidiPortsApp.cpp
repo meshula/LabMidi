@@ -36,14 +36,14 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "MidiPortsApp.h"
 
-#include "LabMidi/LabMidiCommand.h"
-#include "LabMidi/LabMidiIn.h"
-#include "LabMidi/LabMidiOut.h"
-#include "LabMidi/LabMidiPorts.h"
-#include "LabMidi/LabMidiSoftSynth.h"
-#include "LabMidi/LabMidiSong.h"
-#include "LabMidi/LabMidiSongPlayer.h"
-#include "LabMidi/LabMidiUtil.h"
+#include "LabMidi/Command.h"
+#include "LabMidi/In.h"
+#include "LabMidi/Out.h"
+#include "LabMidi/Ports.h"
+#include "LabMidi/SoftSynth.h"
+#include "LabMidi/Song.h"
+#include "LabMidi/SongPlayer.h"
+#include "LabMidi/Util.h"
 
 #include <iostream>
 
@@ -65,12 +65,12 @@ public:
     : midiPorts(new Lab::MidiPorts())
     {
     }
-    
+
     ~Detail()
     {
         delete midiPorts;
     }
-    
+
     void listPorts()
     {
         midiPorts->refreshPortList();
@@ -83,7 +83,7 @@ public:
                 std::cout << "   " << i << ": " << midiPorts->inPort(i) << std::endl;
             std::cout << std::endl;
         }
-        
+
         c = midiPorts->outPorts();
         if (c == 0)
             std::cout << "No MIDI output ports found" << std::endl;
@@ -149,7 +149,7 @@ bool MidiPortsApp::running()
 int main(int argc, char** argv)
 {
     MidiPortsApp* app = new MidiPortsApp();
-    
+
     while (app->running()) {
 #ifdef _MSC_VER
         Sleep(1); // 1ms delay --- to do - shouldn't sleep this long
@@ -158,7 +158,7 @@ int main(int argc, char** argv)
 #endif
         app->update();
     }
-    
+
     delete app;
     return 1;
 }
