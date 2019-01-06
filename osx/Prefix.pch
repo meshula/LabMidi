@@ -1,8 +1,0 @@
-//
-// Prefix header for all source files of the 'LabMidi' target in the 'LabMidi' project
-// See SharedSettings GCC_PRECOMPILE_PREFIX_HEADER in the TemplateInfo.plist for 'Bundle Base.xctemplate' 
-//
-
-#ifdef __OBJC__
-    #import <Cocoa/Cocoa.h>
-#endif
