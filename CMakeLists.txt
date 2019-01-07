@@ -51,7 +51,7 @@ elseif (UNIX)
       set(NEED_PTHREAD ON)
       list(APPEND LABMIDI_LIBS ${ALSA_LIBRARY})
       list(APPEND LABMIDI_INC ${ALSA_INCLUDE_DIR})
-      list(APPEND LABMIDI_DEFS "__LINUX_ALSA__")
+      list(APPEND LABMIDI_DEFS "__LINUX_ALSASEQ__")
     endif()
 
     if (NEED_PTHREAD)
