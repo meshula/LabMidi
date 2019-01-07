@@ -17,6 +17,53 @@ if (NOT CMAKE_DEBUG_POSTFIX)
 endif()
 
 #------------------------------------------------------------------------------
+# Dependencies
+
+set(LABMIDI_DEFS)
+set(LABMIDI_LIBS)
+set(LABMIDI_INC)
+
+if (WIN32)
+    list(APPEND LABMIDI_DEFS __WINDOWS_MM__)
+    list(APPEND LABMIDI_DEFS _CRT_SECURE_NO_WARNINGS)
+    list(APPEND LABMIDI_LIBS winmm.lib)
+elseif (APPLE)
+elseif (UNIX)
+    find_library(JACK_LIB jack)
+    find_package(PkgConfig)
+    pkg_check_modules(jack jack)
+    if (JACK_LIB OR jack_FOUND)
+      set(HAVE_JACK TRUE)
+      set(NEED_PTHREAD ON)
+      list(APPEND PKGCONFIG_REQUIRES "jack")
+      list(APPEND LABMIDI_DEFS "__LINUX_JACK__")
+      if (jack_FOUND)
+        list(APPEND LABMIDI_LIBS ${jack_LIBRARIES})
+        list(APPEND LABMIDI_INC ${jack_INCLUDEDIR})
+      else()
+        list(APPEND LABMIDI_LIBS ${JACK_LIB})
+      endif()
+    elseif (RTMIDI_API_ALSA)
+      set(NEED_PTHREAD ON)
+      find_package(ALSA)
+      if (NOT ALSA_FOUND)
+        message(FATAL_ERROR "ALSA API requested but no ALSA dev libraries found")
+      endif()
+      list(APPEND LABMIDI_LIBS ${ALSA_LIBRARY})
+      list(APPEND LABMIDI_INC ${ALSA_INCLUDE_DIR})
+      list(APPEND LABMIDI_DEFS "__LINUX_ALSA__")
+    endif()
+
+    if (NEED_PTHREAD)
+      find_package(Threads REQUIRED
+        CMAKE_THREAD_PREFER_PTHREAD
+        THREADS_PREFER_PTHREAD_FLAG)
+      list(APPEND LABMIDI_LIBS Threads::Threads)
+    endif()
+else()
+endif()
+
+#------------------------------------------------------------------------------
 # Utilities
 
 function(_set_compile_options proj)
@@ -37,7 +84,6 @@ function(_set_compile_options proj)
         RUNTIME DESTINATION bin)
 endfunction()
 
-
 #------------------------------------------------------------------------------
 # LabMidi
 
@@ -48,11 +94,10 @@ add_library(liblabmidi STATIC ${labmidi_inc} ${labmidi_src} ${rtmidi_src})
 target_include_directories(liblabmidi PRIVATE
     ${LABMIDI_ROOT}/include
     ${LABMIDI_ROOT}/third-party/rtmidi-1.0.15
-    ${LABMIDI_ROOT}/src)
-if (WIN32)
-    target_compile_definitions(liblabmidi PRIVATE __WINDOWS_MM__ _CRT_SECURE_NO_WARNINGS)
-    target_link_libraries(liblabmidi PUBLIC winmm.lib)
-endif()
+    ${LABMIDI_ROOT}/src
+    ${LABMIDI_INC})
+target_compile_definitions(liblabmidi PRIVATE ${LABMIDI_DEFS})
+target_link_libraries(liblabmidi PUBLIC ${LABMIDI_LIBS})
 _set_compile_options(liblabmidi)
 source_group(LabMidi\\include FILES ${labmidi_inc})
 source_group(LabMidi\\src FILES ${labmidi_src})
