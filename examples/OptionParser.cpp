@@ -43,10 +43,11 @@
 #if defined(_WIN32) || defined(_WIN64) /* [i_a] */
 #include <windows.h>
 #endif
+#include <algorithm>
+#include <cstring>
+#include <iostream>
 #include <string>
 #include <vector>
-#include <algorithm>
-#include <iostream>
 #include <assert.h>
 
 using std::vector;
@@ -697,7 +698,7 @@ bool OptionParser::Parse(int argc, char** argv)
         ArgType argType;
         if (argv[i][0] == '-')
         {
-            size_t arglength = strlen(argv[i]);
+            size_t arglength = std::strlen(argv[i]);
             argType = argv[i][1] == '-' ? longArg : shortArg;
             if ((argType == shortArg && arglength == 1) ||
                 (argType == longArg && arglength == 2))
@@ -873,7 +874,7 @@ std::string OptionParser::Canonicalize(const std::string& commandLine)
                             if (i == args.end())
                             {
                                 std::cout << "Missing argument for option: " << arg << " (" << (*j)->Help() << ")" << std::endl;
-                                return false;
+                                return {};
                             }
                             val = *i;
                         }
