@@ -44,6 +44,13 @@ Usage
 See the MidiApp source for examples of usage. Note that MidiApp.cpp currently has hard coded paths to the midi sample files.
 You'll need to make sure you've set your working directory to the folder containing the resources folder. In XCode, under the Product menu, select Edit Schemes..., then the Options tab, then the target you want to run, and click the Use Custom Working Directory box. Fill in the path appropriately.
 
+MidiPlayer
+----------
+
+MidiPlayerApp -o 0 -f path/to/file.midi
+
+Will play file.midi on the 0th port.
+
 License
 -------
 BSD 3-clause. <http://opensource.org/licenses/BSD-3-Clause>
@@ -64,3 +71,5 @@ There's 9,310 piano MIDI files here: <http://www.kuhmann.com/Yamaha.htm>
 
 Thanks to arle <http://www17.atpages.jp/~arle/index.php?%E3%83%8D%E3%82%BF> for publishing mml2mid <http://hpc.jp/~mml2mid/>,
 and to g200kg <http://www.g200kg.com/en/docs/webmodular/> for an MML player.
+
+Thanks to Andre Mazzone and Josh Fillstrup for helping get LabMidi up and running on Linux.
