@@ -35,7 +35,9 @@
 #include "LabMidi/Song.h"
 #include "LabMidi/Util.h"
 
-#include <stdint.h>
+#include <limits>
+#include <vector>
+#include <cstdint>
 
 namespace Lab {
     
@@ -116,8 +118,10 @@ namespace Lab {
             size_t tc = tracks.size();
             
             // double, because don't want to introduce sync slip during rendering
-            double* nextTime = (double*) alloca(sizeof(double) * tc);
-            int* nextIndex = (int*) alloca(sizeof(int) * tc);
+            std::vector<double> nextTime;
+            nextTime.resize(tc);
+            std::vector<int> nextIndex;
+            nextIndex.resize(tc);
             
             int i = 0;
             for (auto t = s->tracks->begin(); t != s->tracks->end(); ++t, ++i) {

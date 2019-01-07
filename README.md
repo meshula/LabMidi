@@ -5,14 +5,14 @@ Cross platform MIDI related utilities.
 
     class MidiIn
     Can read from a MIDI input port, typically provided by a keyboard
-    
+
     class MidiOut
     Outputs to a MIDI port, typically consumed by a synthesizer
-    
+
     class MidiSoftSynth : public MidiOutBase
     A software synthesizer that can be used as a MIDI output. Currently
     only implemented for OSX (and presumably it would work for iOS as well).
-    
+
     class MidiSong
     A song is a collection of tracks, which are a list of MIDI events. A song can
     be parsed from a Standard MIDI file, or from a base64 encoded Standard MIDI file
@@ -20,41 +20,29 @@ Cross platform MIDI related utilities.
     passed in as either an MML string, or a file path. The version parsed is a restricted
     form of Modern MML, and not nearly as sophisticated as what mml2mid can currently
     process.
-    
+
     class MidiSongPlayer
     Can play a single MidiSong. The class is initialized with a pointer
     to a MidiSong. The data in the MidiSong is not retained in any way,
     so after a MidiSongPlayer is instantiated it is fine to discard the
     MidiSong object.
-    
+
     LabMidiUtil.h
     Contains various routines to convert between note names, note numbers,
     and frequency, as well as routines to fetch standard General MIDI names
     for instruments.
-    
+
 Like ofxMidi, I'm thinking of using PGMidi <https://github.com/petegoodliffe/PGMidi> to implement the MidiIn and MidiOUt classes on iOS.
 
 Building
 --------
-Premake 4 is required to generate project and solution files.
-On OSX, type 
-    premake4 xcode4
-in the root folder to generate xcode workspace and project files.
+CMake 3.10 or greater is required for building. Building in the usual way should work out of the box, as LabMidi
+has no external dependencies.
 
 Usage
 -----
-See the MidiApp source for examples of usage. 
-
-Simply include the sources under src/LabMidi in your own project to use as a library.
-
-Note that MidiApp.cpp currently has hard coded paths to the midi sample files. 
+See the MidiApp source for examples of usage. Note that MidiApp.cpp currently has hard coded paths to the midi sample files.
 You'll need to make sure you've set your working directory to the folder containing the resources folder. In XCode, under the Product menu, select Edit Schemes..., then the Options tab, then the target you want to run, and click the Use Custom Working Directory box. Fill in the path appropriately.
-
-Tested on OSX. Implementation for Windows and Linux in place, but not tested. 
-
-premake file needs to be set up for multiple platforms. 
-
-Pull requests welcome.
 
 License
 -------
@@ -74,5 +62,5 @@ It's dual licensed GPL and CC-0. I used the tables in that utility, choosing the
 
 There's 9,310 piano MIDI files here: <http://www.kuhmann.com/Yamaha.htm>
 
-Thanks to arle <http://www17.atpages.jp/~arle/index.php?%E3%83%8D%E3%82%BF> for publishing mml2mid <http://hpc.jp/~mml2mid/>, 
+Thanks to arle <http://www17.atpages.jp/~arle/index.php?%E3%83%8D%E3%82%BF> for publishing mml2mid <http://hpc.jp/~mml2mid/>,
 and to g200kg <http://www.g200kg.com/en/docs/webmodular/> for an MML player.

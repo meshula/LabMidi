@@ -839,7 +839,7 @@ std::string OptionParser::Canonicalize(const std::string& commandLine)
                 (argType == longArg && (*i).length() == 2))
             {
                 std::cout << "Malformed argument: " << (*i) << std::endl;
-                return false;
+                return {};
             }
 
             std::string arg = *i;
@@ -852,7 +852,7 @@ std::string OptionParser::Canonicalize(const std::string& commandLine)
                 if (split.size() != 2)
                 {
                     std::cout << "Malformed argument: " << (*i) << std::endl;
-                    return false;
+                    return {};
                 }
                 arg = split[0];
                 val = split[1];

@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.10)
 
 include_guard()
 project(LabMidi)
@@ -69,7 +69,6 @@ add_executable(LabMidiApp ${midiapp_src})
 target_link_libraries(LabMidiApp LabMidi::Lib)
 target_include_directories(LabMidiApp PRIVATE ${LABMIDI_ROOT}/include)
 _set_compile_options(LabMidiApp)
-source_group(LabMidi\\examples\\MidiApp FILES ${midiapp_src})
 set_property(TARGET LabMidiApp PROPERTY FOLDER "examples")
 
 #------------------------------------------------------------------------------
@@ -83,7 +82,6 @@ add_executable(LabMidiPlayerApp ${midiplayerapp_src})
 target_link_libraries(LabMidiPlayerApp LabMidi::Lib)
 target_include_directories(LabMidiPlayerApp PRIVATE ${LABMIDI_ROOT}/include)
 _set_compile_options(LabMidiPlayerApp)
-source_group(LabMidi\\examples\\MidiPlayerApp FILES ${midiplayerapp_src})
 set_property(TARGET LabMidiPlayerApp PROPERTY FOLDER "examples")
 
 #------------------------------------------------------------------------------
@@ -97,7 +95,6 @@ add_executable(LabMidiPortsApp ${midiportsapp_src})
 target_link_libraries(LabMidiPortsApp LabMidi::Lib)
 target_include_directories(LabMidiPortsApp PRIVATE ${LABMIDI_ROOT}/include)
 _set_compile_options(LabMidiPortsApp)
-source_group(LabMidi\\examples\\MidiPlayerApp FILES ${midiportsapp_src})
 set_property(TARGET LabMidiPortsApp PROPERTY FOLDER "examples")
 
 
