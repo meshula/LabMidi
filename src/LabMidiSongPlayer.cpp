@@ -113,9 +113,8 @@ namespace Lab {
     MidiSongPlayer::MidiSongPlayer(MidiSong* s)
     : _detail(new Detail(s))
     {
-        if (s && s->tracks) {
-            std::vector<MidiTrack*>& tracks = *(s->tracks);
-            size_t tc = tracks.size();
+        if (s) {
+            size_t tc = s->tracks.size();
             
             // double, because don't want to introduce sync slip during rendering
             std::vector<double> nextTime;
@@ -124,8 +123,8 @@ namespace Lab {
             nextIndex.resize(tc);
             
             int i = 0;
-            for (auto t = s->tracks->begin(); t != s->tracks->end(); ++t, ++i) {
-                MidiTrack& track = *(*t);
+            for (auto t = s->tracks.begin(); t != s->tracks.end(); ++t, ++i) {
+                MidiTrack& track = (*t);
                 size_t ec = track.events.size();
                 nextTime[i] = ec ? track.events[0]->deltatime : std::numeric_limits<double>::max();
                 nextIndex[i] = ec ? 0 : -1;
@@ -135,7 +134,7 @@ namespace Lab {
                 double nextEventT = std::numeric_limits<double>::max();
                 int nt = -1;
                 for (int i = 0; i < tc; ++i) {
-                    if (nextIndex[i] >= tracks[i]->events.size())
+                    if (nextIndex[i] >= s->tracks[i].events.size())
                         continue;
                     if (nextTime[i] < nextEventT) {
                         nt = i;
@@ -145,12 +144,12 @@ namespace Lab {
                 if (nt == -1)
                     break;
                 
-                MidiEvent* ev = tracks[nt]->events[nextIndex[nt]];
+                MidiEvent* ev = s->tracks[nt].events[nextIndex[nt]];
                 _detail->recordEvent(nextTime[nt], ev);
                 ++nextIndex[nt];
                 int n = nextIndex[nt];
-                if (n < tracks[nt]->events.size())
-                    nextTime[nt] += _detail->ticksToSeconds(tracks[nt]->events[n]->deltatime);
+                if (n < s->tracks[nt].events.size())
+                    nextTime[nt] += _detail->ticksToSeconds(s->tracks[nt].events[n]->deltatime);
             } while (true);
         }
     }

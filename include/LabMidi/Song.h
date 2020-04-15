@@ -95,7 +95,7 @@ namespace Lab {
         
         float ticksPerBeat;   // precision (number of ticks distinguishable per second)
         float startingTempo;
-        std::vector<MidiTrack*>* tracks;
+        std::vector<MidiTrack> tracks;
     };
 
 } // Lab

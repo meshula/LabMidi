@@ -1,50 +1,12 @@
-/*
- *  MidiApp.cpp
- *
- */
 
-/*
-Copyright (c) 2012, Nick Porcino
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are met:
-
-* Redistributions of source code must retain the above copyright notice, this
-list of conditions and the following disclaimer.
-* Redistributions in binary form must reproduce the above copyright notice,
-this list of conditions and the following disclaimer in the documentation
-and/or other materials provided with the distribution.
-* The names of its contributors may not be used to endorse or promote products
-derived from this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
-ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-*/
-
-// Note that the sample midi files were obtained from the jasmid
-// distribution on github, and they contain their own internal
-// copyright notices.
+//  Copyright (c) 2012, Nick Porcino
+//  All rights reserved.
+//  SPDX-License-Identifier: BSD-2-Clause
 
 #include "MidiPlayerApp.h"
 #include "OptionParser.h"
 
-#include "LabMidi/Command.h"
-#include "LabMidi/In.h"
-#include "LabMidi/Out.h"
-#include "LabMidi/Ports.h"
-#include "LabMidi/SoftSynth.h"
-#include "LabMidi/Song.h"
-#include "LabMidi/SongPlayer.h"
-#include "LabMidi/Util.h"
+#include <LabMidi/LabMidi.h>
 
 #include <iostream>
 
@@ -62,6 +24,10 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 class MidiPlayerApp::Detail
 {
 public:
+    Lab::MidiPorts* midiPorts = nullptr;
+    Lab::MidiSongPlayer* midiSongPlayer = nullptr;
+    double startTime = 0;
+
     Detail()
     : midiPorts(new Lab::MidiPorts())
     , midiSongPlayer(0)
@@ -78,7 +44,7 @@ public:
         midiPorts->refreshPortList();
         int c = midiPorts->inPorts();
         if (c == 0)
-            std::cout << "No MIDI input ports found" << std::endl;
+            std::cout << "No MIDI input ports found\n\n";
         else {
             std::cout << "MIDI input ports:" << std::endl;
             for (int i = 0; i < c; ++i)
@@ -88,7 +54,7 @@ public:
 
         c = midiPorts->outPorts();
         if (c == 0)
-            std::cout << "No MIDI output ports found" << std::endl;
+            std::cout << "No MIDI output ports found\n\n";
         else {
             std::cout << "MIDI output ports:" << std::endl;
             for (int i = 0; i < c; ++i)
@@ -96,10 +62,6 @@ public:
             std::cout << std::endl;
         }
     }
-
-    Lab::MidiPorts* midiPorts;
-    Lab::MidiSongPlayer* midiSongPlayer;
-    double startTime;
 };
 
 MidiPlayerApp::MidiPlayerApp

@@ -55,6 +55,8 @@ License
 -------
 BSD 3-clause. <http://opensource.org/licenses/BSD-3-Clause>
 
+Note that the sample midi files in the assets directory were obtained from the jasmid
+distribution on github, and they contain their own internal copyright notices.
 
 Thanks
 ------

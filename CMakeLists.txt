@@ -4,17 +4,8 @@ include_guard()
 project(LabMidi)
 
 set(LABMIDI_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
-set(CMAKE_MODULE_PATH ${LABMIDI_ROOT}/cmake)
-IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    SET(CMAKE_INSTALL_PREFIX ${LABMIDI_ROOT}/install CACHE PATH "Install root" FORCE)
-ENDIF()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
-if (NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release")
-endif()
-if (NOT CMAKE_DEBUG_POSTFIX)
-    set(CMAKE_DEBUG_POSTFIX _d)
-endif()
+set(CMAKE_DEBUG_POSTFIX _d)
 
 #------------------------------------------------------------------------------
 # Dependencies
@@ -67,7 +58,7 @@ endif()
 # Utilities
 
 function(_set_compile_options proj)
-    target_compile_features(${proj} INTERFACE cxx_std_11)
+    target_compile_features(${proj} INTERFACE cxx_std_14)
     if(WIN32)
         target_compile_options(${proj} PRIVATE /Zi)
     elseif (APPLE)
@@ -103,7 +94,7 @@ source_group(LabMidi\\include FILES ${labmidi_inc})
 source_group(LabMidi\\src FILES ${labmidi_src})
 source_group(LabMidi\\RtMidi FILES ${rtmidi_src})
 install(FILES ${labmidi_inc} DESTINATION include/LabMidi)
-add_library(LabMidi::Lib ALIAS liblabmidi)
+add_library(Lab::Midi ALIAS liblabmidi)
 
 #------------------------------------------------------------------------------
 # example: MidiApp
@@ -111,7 +102,7 @@ add_library(LabMidi::Lib ALIAS liblabmidi)
 set(midiapp_src "${LABMIDI_ROOT}/examples/MidiApp.h"
                 "${LABMIDI_ROOT}/examples/MidiApp.cpp")
 add_executable(LabMidiApp ${midiapp_src})
-target_link_libraries(LabMidiApp LabMidi::Lib)
+target_link_libraries(LabMidiApp Lab::Midi)
 target_include_directories(LabMidiApp PRIVATE ${LABMIDI_ROOT}/include)
 _set_compile_options(LabMidiApp)
 set_property(TARGET LabMidiApp PROPERTY FOLDER "examples")
@@ -124,7 +115,7 @@ set(midiplayerapp_src "${LABMIDI_ROOT}/examples/MidiPlayerApp.h"
                       "${LABMIDI_ROOT}/examples/OptionParser.h"
                       "${LABMIDI_ROOT}/examples/OptionParser.cpp")
 add_executable(LabMidiPlayerApp ${midiplayerapp_src})
-target_link_libraries(LabMidiPlayerApp LabMidi::Lib)
+target_link_libraries(LabMidiPlayerApp Lab::Midi)
 target_include_directories(LabMidiPlayerApp PRIVATE ${LABMIDI_ROOT}/include)
 _set_compile_options(LabMidiPlayerApp)
 set_property(TARGET LabMidiPlayerApp PROPERTY FOLDER "examples")
@@ -137,7 +128,7 @@ set(midiportsapp_src "${LABMIDI_ROOT}/examples/MidiPlayerApp.h"
                       "${LABMIDI_ROOT}/examples/OptionParser.h"
                       "${LABMIDI_ROOT}/examples/OptionParser.cpp")
 add_executable(LabMidiPortsApp ${midiportsapp_src})
-target_link_libraries(LabMidiPortsApp LabMidi::Lib)
+target_link_libraries(LabMidiPortsApp Lab::Midi)
 target_include_directories(LabMidiPortsApp PRIVATE ${LABMIDI_ROOT}/include)
 _set_compile_options(LabMidiPortsApp)
 set_property(TARGET LabMidiPortsApp PROPERTY FOLDER "examples")
