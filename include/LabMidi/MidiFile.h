@@ -31,7 +31,8 @@
 
 #pragma once
 
-#include <string>
+#include <algorithm>
+#include <ostream>
 #include <vector>
 
 namespace Lab {
@@ -62,56 +63,63 @@ namespace Lab {
         KEY_SIGNATURE = 0x59,
         PROPRIETARY = 0x7F,
         SYSTEM_EXCLUSIVE = 0xF0,
-        END_OF_SYSTEM_EXCLUSIVE = 0xF7,
+        END_OF_EXCLUSIVE = 0xF7,
         LABMIDI_CHANNEL_EVENT = 0xFE,
         UNKNOWN = 0xFF
     };
     
+    constexpr inline uint8_t clamp(uint8_t val, uint8_t min, uint8_t max)
+    {
+        return std::max(std::min(val, max), min);
+    }
+
     struct MidiEvent {
         MidiEvent(Midi_MetaEventType s) : eventType(s), tick(0) { }
         virtual ~MidiEvent() { }
         Midi_MetaEventType eventType;
         int tick;
+        std::vector<uint8_t> data;
     };
     
     struct Event_SequenceNumber : public MidiEvent {
-        Event_SequenceNumber() : MidiEvent(Midi_MetaEventType::SEQUENCE_NUMBER) {} int number = 0; };
+        Event_SequenceNumber() : MidiEvent(Midi_MetaEventType::SEQUENCE_NUMBER) {} uint16_t number = 0; };
     struct Event_Text : public MidiEvent {
-        Event_Text() : MidiEvent(Midi_MetaEventType::TEXT) {} std::string text; };
+        Event_Text() : MidiEvent(Midi_MetaEventType::TEXT) {} };
     struct Event_CopyrightNotice : public MidiEvent {
-        Event_CopyrightNotice() : MidiEvent(Midi_MetaEventType::COPYRIGHT) {} std::string text; };
+        Event_CopyrightNotice() : MidiEvent(Midi_MetaEventType::COPYRIGHT) {} };
     struct Event_TrackName : public MidiEvent {
-        Event_TrackName() : MidiEvent(Midi_MetaEventType::TRACK_NAME) {} std::string text; };
+        Event_TrackName() : MidiEvent(Midi_MetaEventType::TRACK_NAME) {} };
     struct Event_InstrumentName : public MidiEvent {
-        Event_InstrumentName() : MidiEvent(Midi_MetaEventType::INSTRUMENT) {} std::string text; };
+        Event_InstrumentName() : MidiEvent(Midi_MetaEventType::INSTRUMENT) {} };
     struct Event_Lyrics : public MidiEvent {
-        Event_Lyrics() : MidiEvent(Midi_MetaEventType::LYRIC) {} std::string text; };
+        Event_Lyrics() : MidiEvent(Midi_MetaEventType::LYRIC) {} };
     struct Event_Marker : public MidiEvent {
-        Event_Marker() : MidiEvent(Midi_MetaEventType::MARKER) {} std::string text; };
+        Event_Marker() : MidiEvent(Midi_MetaEventType::MARKER) {} };
     struct Event_Cue : public MidiEvent {
-        Event_Cue() : MidiEvent(Midi_MetaEventType::CUE) {} std::string text; };
+        Event_Cue() : MidiEvent(Midi_MetaEventType::CUE) {} };
     struct Event_MidiChannelPrefix : public MidiEvent {
-        Event_MidiChannelPrefix() : MidiEvent(Midi_MetaEventType::MIDI_CHANNEL_PREFIX) {} int channel = 0; };
+        Event_MidiChannelPrefix() : MidiEvent(Midi_MetaEventType::MIDI_CHANNEL_PREFIX) {} uint8_t channel = 0; };
     struct Event_EndOfTrack : public MidiEvent {
         Event_EndOfTrack() : MidiEvent(Midi_MetaEventType::END_OF_TRACK) {} };
     struct Event_SetTempo : public MidiEvent {
         Event_SetTempo() : MidiEvent(Midi_MetaEventType::TEMPO_CHANGE) {} int microsecondsPerBeat = 125000; };
     struct Event_SmpteOffset : public MidiEvent {
-        Event_SmpteOffset() : MidiEvent(Midi_MetaEventType::SMPTE_OFFSET) {} int framerate = 0; int hour = 0; int min = 0; int sec = 0; int frame = 0; int subframe = 0; };
+        Event_SmpteOffset() : MidiEvent(Midi_MetaEventType::SMPTE_OFFSET) {} uint8_t framerate = 0; uint8_t hour = 0; uint8_t min = 0; uint8_t sec = 0; uint8_t frame = 0; uint8_t subframe = 0; };
     struct Event_TimeSignature : public MidiEvent {
-        Event_TimeSignature() : MidiEvent(Midi_MetaEventType::TIME_SIGNATURE) {}  int numerator = 0; int denominator = 0; int metronome = 0; int thirtyseconds = 0; };
+        Event_TimeSignature() : MidiEvent(Midi_MetaEventType::TIME_SIGNATURE) {}  uint8_t numerator = 0; int denominator = 0; uint8_t metronome = 0; uint8_t thirtyseconds = 0; };
     struct Event_KeySignature : public MidiEvent {
-        Event_KeySignature() : MidiEvent(Midi_MetaEventType::KEY_SIGNATURE) {}  int key = 0; int scale = 0; };
+        Event_KeySignature() : MidiEvent(Midi_MetaEventType::KEY_SIGNATURE) {} uint8_t key = 0; uint8_t scale = 0; };
     struct Event_SequencerSpecific : public MidiEvent {
-        Event_SequencerSpecific() : MidiEvent(Midi_MetaEventType::PROPRIETARY) {}  std::vector<uint8_t> data; };
+        Event_SequencerSpecific() : MidiEvent(Midi_MetaEventType::PROPRIETARY) {} };
     struct Event_Unknown : public MidiEvent {
-        Event_Unknown() : MidiEvent(Midi_MetaEventType::UNKNOWN) {}  std::vector<uint8_t> data; };
+        Event_Unknown() : MidiEvent(Midi_MetaEventType::UNKNOWN) {} };
     struct Event_SysEx : public MidiEvent {
-        Event_SysEx() : MidiEvent(Midi_MetaEventType::SYSTEM_EXCLUSIVE) {}  std::vector<uint8_t> data; };
+        Event_SysEx() : MidiEvent(Midi_MetaEventType::SYSTEM_EXCLUSIVE) {} };
     struct Event_DividedSysEx : public MidiEvent {
-        Event_DividedSysEx() : MidiEvent(Midi_MetaEventType::END_OF_SYSTEM_EXCLUSIVE) {}  std::vector<uint8_t> data; };
+        Event_DividedSysEx() : MidiEvent(Midi_MetaEventType::END_OF_EXCLUSIVE) {} };
+
     struct Event_Channel : public MidiEvent {
-        Event_Channel() : MidiEvent(Midi_MetaEventType::LABMIDI_CHANNEL_EVENT) {} uint8_t midiCommand = 0; uint8_t param1 = 0; uint8_t param2 = 0; };
+        Event_Channel() : MidiEvent(Midi_MetaEventType::LABMIDI_CHANNEL_EVENT) {} };
 
     class MidiTrack {
     public:

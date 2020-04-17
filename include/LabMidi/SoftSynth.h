@@ -34,8 +34,7 @@
 
 #pragma once
 
-#include "LabMidi/Out.h"
-#include "LabMidi/Event.h"
+#include "LabMidi/MidiInOut.h"
 
 namespace Lab {
     

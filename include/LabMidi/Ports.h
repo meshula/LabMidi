@@ -47,8 +47,9 @@ namespace Lab {
     public:
         // Manage a list of ports
         void refreshPortList();
-        unsigned int inPorts() const;
-        unsigned int outPorts() const;
+        
+        int inPorts() const;
+        int outPorts() const;
         const std::string& inPort(int i) const;
         const std::string& outPort(int i) const;
         char const*const inPortCStr(int i) const;

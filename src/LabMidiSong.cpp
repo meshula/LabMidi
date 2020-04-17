@@ -87,9 +87,9 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 */
 
-#include "LabMidi/Song.h"
+#include "LabMidi/MidiFile.h"
 
-#include "LabMidi/Command.h"
+#include "LabMidi/MidiInOut.h"
 
 #include <stdexcept>
 #include <iostream>
@@ -98,6 +98,65 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <string.h>
 #include <vector>
 
+
+
+/*
+    ** decodeblock
+    **
+    ** decode 4 '6-bit' characters into 3 8-bit binary bytes
+    */
+void decodeblock(unsigned char in[4], unsigned char out[3])
+{
+    out[0] = (unsigned char)(in[0] << 2 | in[1] >> 4);
+    out[1] = (unsigned char)(in[1] << 4 | in[2] >> 2);
+    out[2] = (unsigned char)(((in[2] << 6) & 0xc0) | in[3]);
+}
+
+/*
+    ** Translation Table to decode (created by author)
+    */
+static const char cd64[] = "|$$$}rstuvwxyz{$$$$$$$>?@ABCDEFGHIJKLMNOPQRSTUVW$$$$$$XYZ[\\]^_`abcdefghijklmnopq";
+
+/*
+    ** decode
+    **
+    ** decode a base64 encoded stream discarding padding, line breaks and noise
+    */
+void decode64(uint8_t const* infile, uint8_t* outfile, size_t filelen)
+{
+    unsigned char in[4], out[3], v;
+    int i, len;
+
+    while (filelen > 0) {
+        for (len = 0, i = 0; i < 4 && (filelen > 0); i++) {
+            v = 0;
+            while ((filelen > 0) && v == 0) {
+                v = (unsigned char)*infile++;
+                --filelen;
+                v = (unsigned char)((v < 43 || v > 122) ? 0 : cd64[v - 43]);
+                if (v) {
+                    v = (unsigned char)((v == '$') ? 0 : v - 61);
+                }
+            }
+            if (filelen > 0) {
+                len++;
+                if (v) {
+                    in[i] = (unsigned char)(v - 1);
+                }
+            }
+            else {
+                in[i] = 0;
+            }
+        }
+        if (len) {
+            decodeblock(in, out);
+            for (i = 0; i < len - 1; i++) {
+                *outfile = out[i];
+                ++outfile;
+            }
+        }
+    }
+}
 
 namespace mm
 {
@@ -267,15 +326,13 @@ inline uint32_t read_uint32_be(uint8_t const *& data)
     return result;
 }
 
-    
 
 MidiEvent* parseEvent(uint8_t const*& dataStart, uint8_t lastEventTypeByte)
 {
-    using mm::MessageType;
     uint8_t eventTypeByte = *dataStart++;
     
-    if ((eventTypeByte & 0xf0) == 0xf0) {
-
+    if ((eventTypeByte & 0xf0) == 0xf0) 
+    {
         mm::MessageType message_type = static_cast<mm::MessageType>(eventTypeByte);
 
         /* system / meta event */
@@ -293,50 +350,50 @@ MidiEvent* parseEvent(uint8_t const*& dataStart, uint8_t lastEventTypeByte)
             }
             case Midi_MetaEventType::TEXT: {
                 auto event = new Event_Text();
-                event->text.assign((char*)dataStart, length);
+                event->data.assign(dataStart, dataStart + length);
                 dataStart += length;
                 return event;
             }
             case Midi_MetaEventType::COPYRIGHT: {
                 auto event = new Event_CopyrightNotice();
-                event->text.assign((char*)dataStart, length);
+                event->data.assign(dataStart, dataStart + length);
                 dataStart += length;
                 return event;
             }
             case Midi_MetaEventType::TRACK_NAME: {
                 auto event = new Event_TrackName();
-                event->text.assign((char*)dataStart, length);
+                event->data.assign(dataStart, dataStart + length);
                 dataStart += length;
                 return event;
             }
             case Midi_MetaEventType::INSTRUMENT: {
                 auto event = new Event_InstrumentName();
-                event->text.assign((char*)dataStart, length);
+                event->data.assign(dataStart, dataStart + length);
                 dataStart += length;
                 return event;
             }
             case Midi_MetaEventType::LYRIC: {
                 auto event = new Event_Lyrics();
-                event->text.assign((char*)dataStart, length);
+                event->data.assign(dataStart, dataStart + length);
                 dataStart += length;
                 return event;
             }
             case Midi_MetaEventType::MARKER: {
                 auto event = new Event_Marker();
-                event->text.assign((char*)dataStart, length);
+                event->data.assign(dataStart, dataStart + length);
                 dataStart += length;
                 return event;
             }
             case Midi_MetaEventType::CUE: {
                 auto event = new Event_Cue();
-                event->text.assign((char*)dataStart, length);
+                event->data.assign(dataStart, dataStart + length);
                 dataStart += length;
                 return event;
             }
             case Midi_MetaEventType::MIDI_CHANNEL_PREFIX: {
                 if (length != 1) throw std::invalid_argument("Expected length for midiChannelPrefix event is 1");
                 auto event = new Event_MidiChannelPrefix();
-                event->channel = *(uint8_t*)dataStart;
+                event->channel = *dataStart;
                 ++dataStart;
                 return event;
             }
@@ -362,26 +419,26 @@ MidiEvent* parseEvent(uint8_t const*& dataStart, uint8_t lastEventTypeByte)
                 case 0x60: event->framerate = 30; break;
                 }
                 event->hour = hourByte & 0x1f;
-                event->min = int(*dataStart++);
-                event->sec = int(*dataStart++);
-                event->frame = int(*dataStart++);
-                event->subframe = int(*dataStart++);
+                event->min = *dataStart++;
+                event->sec = *dataStart++;
+                event->frame = *dataStart++;
+                event->subframe = *dataStart++;
                 return event;
             }
             case Midi_MetaEventType::TIME_SIGNATURE: {
                 if (length != 4) throw std::invalid_argument("Expected length for TIME_SIGNATURE event is 4");
                 auto event = new Event_TimeSignature();
-                event->numerator = int(*dataStart++);
+                event->numerator = *dataStart++;
                 event->denominator = int(powf(2.0f, float(*dataStart++)));
-                event->metronome = int(*dataStart++);
-                event->thirtyseconds = int(*dataStart++);
+                event->metronome = *dataStart++;
+                event->thirtyseconds = *dataStart++;
                 return event;
             }
             case Midi_MetaEventType::KEY_SIGNATURE: {
                 if (length != 2) throw std::invalid_argument("Expected length for KEY_SIGNATURE event is 2");
                 auto event = new Event_KeySignature();
-                event->key = int(*dataStart++);
-                event->scale = int(*dataStart++);
+                event->key = *dataStart++;
+                event->scale = *dataStart++;
                 return event;
             }
             case Midi_MetaEventType::PROPRIETARY: {
@@ -422,7 +479,7 @@ MidiEvent* parseEvent(uint8_t const*& dataStart, uint8_t lastEventTypeByte)
     else {
         /* channel event */
         auto event = new Event_Channel();
-        int param1;
+        uint8_t param1;
         if ((eventTypeByte & 0x80) == 0) {
             // Running status is described here:
             // http://home.roadrunner.com/~jgglatt/tech/midispec/run.htm
@@ -433,34 +490,34 @@ MidiEvent* parseEvent(uint8_t const*& dataStart, uint8_t lastEventTypeByte)
             eventTypeByte = lastEventTypeByte;
         }
         else {
-            param1 = int(*dataStart++);
+            param1 = *dataStart++;
             lastEventTypeByte = eventTypeByte;
         }
-        event->midiCommand = eventTypeByte;
-        event->param1 = param1;
-        event->param2 = 0xff;   // don't transmit this value
+
+        // 0xff will likely be overwritten in the next switch
+        event->data = { eventTypeByte, param1, 0xff };
 
         mm::MessageType message_type = static_cast<mm::MessageType>(eventTypeByte & 0xf0);
 
         switch (message_type) {
         case mm::MessageType::NOTE_OFF:
-            event->param2 = int(*dataStart++);
+            event->data[2] = int(*dataStart++);
             return event;
         case mm::MessageType::NOTE_ON:
-            event->param2 = int(*dataStart++); // velocity
+            event->data[2] = int(*dataStart++); // velocity
             return event;
         case mm::MessageType::POLY_PRESSURE: // after touch
-            event->param2 = int(*dataStart++); // amount
+            event->data[2] = int(*dataStart++); // amount
             return event;
         case mm::MessageType::CONTROL_CHANGE:
-            event->param2 = int(*dataStart++); // amount
+            event->data[2] = int(*dataStart++); // amount
             return event;
         case mm::MessageType::PROGRAM_CHANGE:
             return event;
         case mm::MessageType::AFTERTOUCH: // channel after touch
             return event;
         case mm::MessageType::PITCH_BEND:
-            event->param2 = int(*dataStart++);
+            event->data[2] = int(*dataStart++);
             return event;
         default:
             throw std::runtime_error("Unrecognised MIDI event type");
@@ -470,80 +527,6 @@ MidiEvent* parseEvent(uint8_t const*& dataStart, uint8_t lastEventTypeByte)
 }
 
 
-void MidiSong::writeMidi(std::ostream & out)
-{
-    // MIDI File Header
-    out << 'M'; out << 'T'; out << 'h'; out << 'd';
-
-    uint16_t num_tracks = tracks.size();
-    uint16_t ticks_per_quarter_note = 120; /// @TODO default value, should store something in the loader, how does it relate to ticksPerBeat?
-
-    mm::write_uint32_be(out, 6);
-    mm::write_uint16_be(out, num_tracks == 1? 0 : 1);
-    mm::write_uint16_be(out, num_tracks);
-    mm::write_uint16_be(out, ticks_per_quarter_note);
-            
-    std::vector<uint8_t> trackRawData;
-            
-    for (MidiTrack& midi_track : tracks)
-    {
-        for (MidiEvent* event : midi_track.events)
-        {
-            const Midi_MetaEventType msg = event->eventType;
-            
-            // Suppress end-of-track meta messages (one will be added
-            // automatically after all track data has been written).
-            if (msg == Midi_MetaEventType::END_OF_TRACK)
-                continue;
-
-            mm::write_variable_length(event->tick, trackRawData);
-#if 0
-            if ((msg == Midi_MetaEventType::SYSTEM_EXCLUSIVE) || (msg == Midi_MetaEventType::END_OF_SYSTEM_EXCLUSIVE))
-            {
-                // 0xf0 == Complete sysex message (0xf0 is part of the raw MIDI).
-                // 0xf7 == Raw byte message (0xf7 not part of the raw MIDI).
-                // Print the first byte of the message (0xf0 or 0xf7), then
-                // print a VLV length for the rest of the bytes in the message.
-                // In other words, when creating a 0xf0 or 0xf7 MIDI message,
-                // do not insert the VLV byte length yourself, as this code will
-                // do it for you automatically.
-                trackRawData.emplace_back(msg->data[0]); // 0xf0 or 0xf7;
-                        
-                mm::write_variable_length(uint32_t(msg->messageSize() - 1), trackRawData);
-                        
-                for (size_t k = 1; k < msg->messageSize(); k++)
-                {
-                    trackRawData.emplace_back((*msg)[k]);
-                }
-            }    
-            else
-            {
-                // Non-sysex type of message, so just output the bytes of the message:
-                for (size_t k = 0; k < msg->messageSize(); k++)
-                {
-                    trackRawData.emplace_back((*msg)[k]);
-                }
-            }
-#endif
-        }
-    }
-                
-    auto size = trackRawData.size();
-
-    // if the track is too small to have an end, or the final data is not an end of track, then write an end of track.
-    if ((size < 3) || !((trackRawData[size - 3] == 0xFF) && (trackRawData[size - 2] == 0x2F)))
-    {
-        trackRawData.emplace_back(0x0); // tick
-        trackRawData.emplace_back(0xFF);
-        trackRawData.emplace_back(0x2F);
-        trackRawData.emplace_back(0x00);
-    }
-            
-    // Write the track ID marker "MTrk":
-    out << 'M'; out << 'T'; out << 'r'; out << 'k';
-    mm::write_uint32_be(out, uint32_t(trackRawData.size()));
-    out.write((char*) trackRawData.data(), trackRawData.size());
-}
 
 MidiSong::MidiSong()
 : tracks(0)
@@ -560,65 +543,6 @@ MidiSong::~MidiSong()
 void MidiSong::clearTracks()
 {
     tracks.clear();
-}
-
-
-/*
-    ** decodeblock
-    **
-    ** decode 4 '6-bit' characters into 3 8-bit binary bytes
-    */
-void decodeblock( unsigned char in[4], unsigned char out[3] )
-{
-    out[ 0 ] = (unsigned char ) (in[0] << 2 | in[1] >> 4);
-    out[ 1 ] = (unsigned char ) (in[1] << 4 | in[2] >> 2);
-    out[ 2 ] = (unsigned char ) (((in[2] << 6) & 0xc0) | in[3]);
-}
-
-/*
-    ** Translation Table to decode (created by author)
-    */
-static const char cd64[]="|$$$}rstuvwxyz{$$$$$$$>?@ABCDEFGHIJKLMNOPQRSTUVW$$$$$$XYZ[\\]^_`abcdefghijklmnopq";
-
-/*
-    ** decode
-    **
-    ** decode a base64 encoded stream discarding padding, line breaks and noise
-    */
-void decode64(uint8_t const* infile, uint8_t* outfile, size_t filelen)
-{
-    unsigned char in[4], out[3], v;
-    int i, len;
-    
-    while(filelen > 0) {
-        for( len = 0, i = 0; i < 4 && (filelen > 0); i++ ) {
-            v = 0;
-            while( (filelen > 0) && v == 0 ) {
-                v = (unsigned char) *infile++;
-                --filelen;
-                v = (unsigned char) ((v < 43 || v > 122) ? 0 : cd64[ v - 43 ]);
-                if( v ) {
-                    v = (unsigned char) ((v == '$') ? 0 : v - 61);
-                }
-            }
-            if(filelen > 0) {
-                len++;
-                if( v ) {
-                    in[ i ] = (unsigned char) (v - 1);
-                }
-            }
-            else {
-                in[i] = 0;
-            }
-        }
-        if( len ) {
-            decodeblock( in, out );
-            for( i = 0; i < len - 1; i++ ) {
-                *outfile = out[i];
-                ++outfile;
-            }
-        }
-    }
 }
 
 
@@ -650,7 +574,10 @@ void MidiSong::parse(uint8_t const*const a, size_t length, bool verbose)
             std::cerr << "Bad .mid file - couldn't parse header" << std::endl;
         return;
     }
-    
+
+    // Midi Format 0 is a single track
+    // Midi Format 1 has multiple same length tracks
+    // Midi Format 2 has multiple tracks of arbitrary lengths and starts, typically used as clips
     /*int formatType = */ read_uint16_be(dataStart);
     uint16_t trackCount = read_uint16_be(dataStart);
     uint16_t timeDivision = read_uint16_be(dataStart);
@@ -688,9 +615,8 @@ void MidiSong::parse(uint8_t const*const a, size_t length, bool verbose)
                 int duration = read_variable_length(dataStart);
                 MidiEvent* ev = parseEvent(dataStart, runningEvent);
                 ev->tick = duration;
-                Event_Channel* ce = dynamic_cast<Event_Channel*>(ev);
-                if (ce)
-                    runningEvent = ce->midiCommand;
+                if (ev->data.size() > 0)
+                    runningEvent = ev->data[0];
                 track->events.push_back(ev);
             }
         }
@@ -716,6 +642,82 @@ void MidiSong::parse(char const*const path, bool verbose)
         parse(a, l, verbose);
         delete [] a;
     }
+}
+
+
+void MidiSong::writeMidi(std::ostream& out)
+{
+    // MIDI File Header
+    out << 'M'; out << 'T'; out << 'h'; out << 'd';
+
+    uint16_t num_tracks = static_cast<uint16_t>(tracks.size());
+    uint16_t ticks_per_quarter_note = 120; /// @TODO default value, should store something in the loader, how does it relate to ticksPerBeat?
+
+    mm::write_uint32_be(out, 6);
+    mm::write_uint16_be(out, num_tracks == 1 ? 0 : 1);
+    mm::write_uint16_be(out, num_tracks);
+    mm::write_uint16_be(out, ticks_per_quarter_note);
+
+    std::vector<uint8_t> trackRawData;
+
+    for (MidiTrack& midi_track : tracks)
+    {
+        for (MidiEvent* event : midi_track.events)
+        {
+            const Midi_MetaEventType msg = event->eventType;
+
+            // Suppress end-of-track meta messages (one will be added
+            // automatically after all track data has been written).
+            if (msg == Midi_MetaEventType::END_OF_TRACK)
+                continue;
+
+            mm::write_variable_length(event->tick, trackRawData);
+#if 0
+            if ((msg == Midi_MetaEventType::SYSTEM_EXCLUSIVE) || (msg == Midi_MetaEventType::END_OF_SYSTEM_EXCLUSIVE))
+            {
+                // 0xf0 == Complete sysex message (0xf0 is part of the raw MIDI).
+                // 0xf7 == Raw byte message (0xf7 not part of the raw MIDI).
+                // Print the first byte of the message (0xf0 or 0xf7), then
+                // print a VLV length for the rest of the bytes in the message.
+                // In other words, when creating a 0xf0 or 0xf7 MIDI message,
+                // do not insert the VLV byte length yourself, as this code will
+                // do it for you automatically.
+                trackRawData.emplace_back(msg->data[0]); // 0xf0 or 0xf7;
+
+                mm::write_variable_length(uint32_t(msg->messageSize() - 1), trackRawData);
+
+                for (size_t k = 1; k < msg->messageSize(); k++)
+                {
+                    trackRawData.emplace_back((*msg)[k]);
+                }
+            }
+            else
+            {
+                // Non-sysex type of message, so just output the bytes of the message:
+                for (size_t k = 0; k < msg->messageSize(); k++)
+                {
+                    trackRawData.emplace_back((*msg)[k]);
+                }
+            }
+#endif
+        }
+    }
+
+    auto size = trackRawData.size();
+
+    // if the track is too small to have an end, or the final data is not an end of track, then write an end of track.
+    if ((size < 3) || !((trackRawData[size - 3] == 0xFF) && (trackRawData[size - 2] == 0x2F)))
+    {
+        trackRawData.emplace_back(0x0); // tick
+        trackRawData.emplace_back(0xFF);
+        trackRawData.emplace_back(0x2F);
+        trackRawData.emplace_back(0x00);
+    }
+
+    // Write the track ID marker "MTrk":
+    out << 'M'; out << 'T'; out << 'r'; out << 'k';
+    mm::write_uint32_be(out, uint32_t(trackRawData.size()));
+    out.write((char*)trackRawData.data(), trackRawData.size());
 }
 
 //------------------------------------------------------------
@@ -791,10 +793,8 @@ void storeMMLEvent(MidiTrack* track, uint8_t eventTypeByte, uint8_t note, uint8_
     /* channel event */
     Event_Channel* event = new Event_Channel();
     event->tick = duration;
-    event->midiCommand = eventTypeByte;
-    event->param1 = note;
-    event->param2 = amount;
-    track->events.push_back(event);
+    event->data = { eventTypeByte, note, amount };
+    track->events.emplace_back(event);
 }
 
 // The variant of MML parsed here was produced by studying http://www.g200kg.com/en/docs/webmodular/,

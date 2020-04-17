@@ -1,7 +1,5 @@
 //
-//  LabMidiOut.h
-//
-//  CoreAudio, CoreMidi, and CoreFoundation frameworks are required on OSX/iOS
+//  LabMidiSongPlayer.h
 //
 
 /*
@@ -33,49 +31,33 @@
 
 #pragma once
 
-#include "LabMidi/Event.h"
-
-#include <string>
-#include <vector>
+#include "LabMidi/MidiInOut.h"
 
 namespace Lab {
 
-    struct MidiCommand;
+    class MidiSong;
     
-    class MidiOutBase {
-    public:
-        virtual ~MidiOutBase() { }
-        virtual void command(const MidiCommand*) = 0;
-    };
+    struct MidiRtEvent;
     
-    class MidiOut : public MidiOutBase {
+    typedef void (*MidiEventCallbackFn)(void* userData, MidiRtEvent*);
+    
+    class MidiSongPlayer {
     public:
-        MidiOut();
-        virtual ~MidiOut();
+        MidiSongPlayer(MidiSong*);
+        ~MidiSongPlayer();
         
-        // createVirtualPort is available on MacOSX and ALSA for allowing other software to connect
-        bool createVirtualPort(const std::string& port) noexcept;
+        void play(float wallClockTime);
+        void update(float wallClockTime);
         
-        bool openPort(unsigned int port);
-        void closePort();
-        unsigned int getPort() const;
+        float length() const; // length of the contained song
         
-        // channels are 0-0xF (not 1-16)
-        void sendNoteOn       (int channel, int id, int value);
-        void sendNoteOff      (int channel, int id, int value);
-        void sendControlChange(int channel, int id, int value);
-        void sendProgramChange(int channel, int value);
-        void sendPitchBend    (int channel, int lsb, int msb);
-        
-        virtual void command(const MidiCommand*);
-
-        // user data will be a MidiSoftSynth pointer
-        static void playerCallback(void* userData, MidiRtEvent*);
+        void addCallback(MidiEventCallbackFn, void* userData);
+        void removeCallback(void* userData);
         
     private:
         class Detail;
         Detail* _detail;
     };
-    
+
 } // Lab
-    
+

@@ -29,10 +29,9 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "LabMidi/SongPlayer.h"
-#include "LabMidi/Command.h"
-#include "LabMidi/Event.h"
-#include "LabMidi/Song.h"
+#include "LabMidi/MidiFile.h"
+#include "LabMidi/MidiFilePlayer.h"
+#include "LabMidi/MidiInOut.h"
 #include "LabMidi/Util.h"
 
 #include <limits>
@@ -92,9 +91,8 @@ namespace Lab {
                 Event_SetTempo* ste = (Event_SetTempo*) ev;
                 beatsPerMinute = 60000000.0f / float(ste->microsecondsPerBeat);
             }
-            else if (ev->eventType == Midi_MetaEventType::LABMIDI_CHANNEL_EVENT) {
-                Event_Channel* ce = (Event_Channel*) ev;
-                events.push_back(MidiRtEvent(float(now), ce->midiCommand, ce->param1, ce->param2));
+            else if (ev->eventType == Midi_MetaEventType::LABMIDI_CHANNEL_EVENT && ev->data.size() >= 2) {
+                events.push_back(MidiRtEvent(float(now), ev->data[0], ev->data[1], ev->data[2]));
             }
         }
         

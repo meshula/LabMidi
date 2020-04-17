@@ -87,12 +87,12 @@ namespace Lab {
         _detail->refreshPortList();
     }
 
-    unsigned int MidiPorts::inPorts() const
+    int MidiPorts::inPorts() const
     {
         return _detail->inPorts;
     }
     
-    unsigned int MidiPorts::outPorts() const
+    int MidiPorts::outPorts() const
     {
         return _detail->outPorts;
     }

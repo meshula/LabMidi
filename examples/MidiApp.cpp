@@ -36,14 +36,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "MidiApp.h"
 
-#include "LabMidi/Command.h"
-#include "LabMidi/In.h"
-#include "LabMidi/Out.h"
-#include "LabMidi/Ports.h"
-#include "LabMidi/SoftSynth.h"
-#include "LabMidi/Song.h"
-#include "LabMidi/SongPlayer.h"
-#include "LabMidi/Util.h"
+#include <LabMidi/LabMidi.h>
 
 #include <iostream>
 
@@ -324,12 +317,12 @@ void MidiApp::setup()
 
 void MidiApp::update()
 {
-    _detail->testMidi->update(getElapsedSeconds() - _detail->startTime);
+    _detail->testMidi->update(static_cast<float>(getElapsedSeconds() - _detail->startTime));
 }
 
 bool MidiApp::running()
 {
-    return _detail->testMidi->running(getElapsedSeconds() - _detail->startTime);
+    return _detail->testMidi->running(static_cast<float>(getElapsedSeconds() - _detail->startTime));
 }
 
 int main(int argc, char** argv)

@@ -29,8 +29,7 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "LabMidi/In.h"
-#include "LabMidi/Command.h"
+#include "LabMidi/MidiInOut.h"
 
 #include "RtMidi.h"
 #include <iostream>

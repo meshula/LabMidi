@@ -30,7 +30,7 @@
  */
 
 #include "LabMidi/SoftSynth.h"
-#include "LabMidi/Command.h"
+#include "LabMidi/MidiInOut.h"
 
 #if defined(__MACOSX_CORE__)
 
