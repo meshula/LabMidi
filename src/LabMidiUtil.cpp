@@ -67,7 +67,7 @@ namespace Lab {
         "Song Select",
         "Reserved 1", "Reserved 2",
         "Tune Request",
-        "EOX",
+        "END_OF_SYSTEM_EXCLUSIVE",
         // 0xF8 System Realtime
         "Time Clock",
         "Reserved 3",

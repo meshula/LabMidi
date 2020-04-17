@@ -37,43 +37,81 @@
 namespace Lab {
 
     class MidiOutBase;
-    
-    enum MIDI_EventType {
-        MIDI_EventSequenceNumber, MIDI_EventText, MIDI_EventCopyrightNotice,
-        MIDI_EventTrackName, MIDI_EventInstrumentName, MIDI_EventLyrics,
-        MIDI_EventMarker, MIDI_EventCuePoint, MIDI_EventMidiChannelPrefix,
-        MIDI_EventEndOfTrack, MIDI_EventSetTempo, MIDI_EventSmpteOffset,
-        MIDI_EventTimeSignature, MIDI_EventKeySignature, MIDI_EventSequencerSpecific,
-        MIDI_EventUnknown, MIDI_EventSysEx, MIDI_EventDividedSysEx, MIDI_EventChannel
+
+    //////////////////////////
+    // (Meta) Message Type  //
+    //////////////////////////
+
+    enum class Midi_MetaEventType : uint8_t
+    {
+        SEQUENCE_NUMBER = 0x00,
+        TEXT = 0x01,
+        COPYRIGHT = 0x02,
+        TRACK_NAME = 0x03,
+        INSTRUMENT = 0x04,
+        LYRIC = 0x05,
+        MARKER = 0x06,
+        CUE = 0x07,
+        PATCH_NAME = 0x08,
+        DEVICE_NAME = 0x09,
+        MIDI_CHANNEL_PREFIX = 0x20,
+        END_OF_TRACK = 0x2F,
+        TEMPO_CHANGE = 0x51,
+        SMPTE_OFFSET = 0x54,
+        TIME_SIGNATURE = 0x58,
+        KEY_SIGNATURE = 0x59,
+        PROPRIETARY = 0x7F,
+        SYSTEM_EXCLUSIVE = 0xF0,
+        END_OF_SYSTEM_EXCLUSIVE = 0xF7,
+        LABMIDI_CHANNEL_EVENT = 0xFE,
+        UNKNOWN = 0xFF
     };
     
     struct MidiEvent {
-        MidiEvent(MIDI_EventType s) : eventType(s), deltatime(0) { }
+        MidiEvent(Midi_MetaEventType s) : eventType(s), tick(0) { }
         virtual ~MidiEvent() { }
-        MIDI_EventType eventType;
-        int deltatime;
+        Midi_MetaEventType eventType;
+        int tick;
     };
     
-    #define DECLARE_EVENT(ev) struct ev ## Event : public MidiEvent { ev ## Event() : MidiEvent(MIDI_Event ## ev) { }
-    DECLARE_EVENT(SequenceNumber) int number; };
-    DECLARE_EVENT(Text) std::string text; };
-    DECLARE_EVENT(CopyrightNotice) std::string text; };
-    DECLARE_EVENT(TrackName) std::string text; };
-    DECLARE_EVENT(InstrumentName) std::string text; };
-    DECLARE_EVENT(Lyrics) std::string text; };
-    DECLARE_EVENT(Marker) std::string text; };
-    DECLARE_EVENT(CuePoint) std::string text; };
-    DECLARE_EVENT(MidiChannelPrefix) int channel; };
-    DECLARE_EVENT(EndOfTrack) };
-    DECLARE_EVENT(SetTempo) int microsecondsPerBeat; };
-    DECLARE_EVENT(SmpteOffset) int framerate; int hour; int min; int sec; int frame; int subframe; };
-    DECLARE_EVENT(TimeSignature) int numerator; int denominator; int metronome; int thirtyseconds; };
-    DECLARE_EVENT(KeySignature) int key; int scale; };
-    DECLARE_EVENT(SequencerSpecific) ~SequencerSpecificEvent() { delete[] data; } uint8_t* data; };
-    DECLARE_EVENT(Unknown) ~UnknownEvent() { delete[] data; } uint8_t* data; };
-    DECLARE_EVENT(SysEx) ~SysExEvent() { delete[] data; } uint8_t* data; };
-    DECLARE_EVENT(DividedSysEx) ~DividedSysExEvent() { delete[] data; } uint8_t* data; };
-    DECLARE_EVENT(Channel) uint8_t midiCommand; uint8_t param1; uint8_t param2; };
+    struct Event_SequenceNumber : public MidiEvent {
+        Event_SequenceNumber() : MidiEvent(Midi_MetaEventType::SEQUENCE_NUMBER) {} int number = 0; };
+    struct Event_Text : public MidiEvent {
+        Event_Text() : MidiEvent(Midi_MetaEventType::TEXT) {} std::string text; };
+    struct Event_CopyrightNotice : public MidiEvent {
+        Event_CopyrightNotice() : MidiEvent(Midi_MetaEventType::COPYRIGHT) {} std::string text; };
+    struct Event_TrackName : public MidiEvent {
+        Event_TrackName() : MidiEvent(Midi_MetaEventType::TRACK_NAME) {} std::string text; };
+    struct Event_InstrumentName : public MidiEvent {
+        Event_InstrumentName() : MidiEvent(Midi_MetaEventType::INSTRUMENT) {} std::string text; };
+    struct Event_Lyrics : public MidiEvent {
+        Event_Lyrics() : MidiEvent(Midi_MetaEventType::LYRIC) {} std::string text; };
+    struct Event_Marker : public MidiEvent {
+        Event_Marker() : MidiEvent(Midi_MetaEventType::MARKER) {} std::string text; };
+    struct Event_Cue : public MidiEvent {
+        Event_Cue() : MidiEvent(Midi_MetaEventType::CUE) {} std::string text; };
+    struct Event_MidiChannelPrefix : public MidiEvent {
+        Event_MidiChannelPrefix() : MidiEvent(Midi_MetaEventType::MIDI_CHANNEL_PREFIX) {} int channel = 0; };
+    struct Event_EndOfTrack : public MidiEvent {
+        Event_EndOfTrack() : MidiEvent(Midi_MetaEventType::END_OF_TRACK) {} };
+    struct Event_SetTempo : public MidiEvent {
+        Event_SetTempo() : MidiEvent(Midi_MetaEventType::TEMPO_CHANGE) {} int microsecondsPerBeat = 125000; };
+    struct Event_SmpteOffset : public MidiEvent {
+        Event_SmpteOffset() : MidiEvent(Midi_MetaEventType::SMPTE_OFFSET) {} int framerate = 0; int hour = 0; int min = 0; int sec = 0; int frame = 0; int subframe = 0; };
+    struct Event_TimeSignature : public MidiEvent {
+        Event_TimeSignature() : MidiEvent(Midi_MetaEventType::TIME_SIGNATURE) {}  int numerator = 0; int denominator = 0; int metronome = 0; int thirtyseconds = 0; };
+    struct Event_KeySignature : public MidiEvent {
+        Event_KeySignature() : MidiEvent(Midi_MetaEventType::KEY_SIGNATURE) {}  int key = 0; int scale = 0; };
+    struct Event_SequencerSpecific : public MidiEvent {
+        Event_SequencerSpecific() : MidiEvent(Midi_MetaEventType::PROPRIETARY) {}  std::vector<uint8_t> data; };
+    struct Event_Unknown : public MidiEvent {
+        Event_Unknown() : MidiEvent(Midi_MetaEventType::UNKNOWN) {}  std::vector<uint8_t> data; };
+    struct Event_SysEx : public MidiEvent {
+        Event_SysEx() : MidiEvent(Midi_MetaEventType::SYSTEM_EXCLUSIVE) {}  std::vector<uint8_t> data; };
+    struct Event_DividedSysEx : public MidiEvent {
+        Event_DividedSysEx() : MidiEvent(Midi_MetaEventType::END_OF_SYSTEM_EXCLUSIVE) {}  std::vector<uint8_t> data; };
+    struct Event_Channel : public MidiEvent {
+        Event_Channel() : MidiEvent(Midi_MetaEventType::LABMIDI_CHANNEL_EVENT) {} uint8_t midiCommand = 0; uint8_t param1 = 0; uint8_t param2 = 0; };
 
     class MidiTrack {
     public:
@@ -87,14 +125,17 @@ namespace Lab {
         
         void parse(uint8_t const*const midifiledata, size_t length, bool verbose);
         void parse(char const*const midifilePath, bool verbose);
-        
+
+        void writeMidi(std::ostream& out);
+
+        // Converts MML to Midi
         void parseMML(char const*const mmlStr, size_t length, bool verbose);
         void parseMML(char const*const midifilePath, bool verbose);
 
         void clearTracks();
         
-        float ticksPerBeat;   // precision (number of ticks distinguishable per second)
-        float startingTempo;
+        float ticksPerBeat = 1;   // precision (number of ticks distinguishable per second)
+        float startingTempo = 120;
         std::vector<MidiTrack> tracks;
     };
 

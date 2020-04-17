@@ -88,12 +88,12 @@ namespace Lab {
         
         void recordEvent(double now, MidiEvent* ev)
         {
-            if (ev->eventType == MIDI_EventSetTempo) {
-                SetTempoEvent* ste = (SetTempoEvent*) ev;
+            if (ev->eventType == Midi_MetaEventType::TEMPO_CHANGE) {
+                Event_SetTempo* ste = (Event_SetTempo*) ev;
                 beatsPerMinute = 60000000.0f / float(ste->microsecondsPerBeat);
             }
-            else if (ev->eventType == MIDI_EventChannel) {
-                ChannelEvent* ce = (ChannelEvent*) ev;
+            else if (ev->eventType == Midi_MetaEventType::LABMIDI_CHANNEL_EVENT) {
+                Event_Channel* ce = (Event_Channel*) ev;
                 events.push_back(MidiRtEvent(float(now), ce->midiCommand, ce->param1, ce->param2));
             }
         }
@@ -126,7 +126,7 @@ namespace Lab {
             for (auto t = s->tracks.begin(); t != s->tracks.end(); ++t, ++i) {
                 MidiTrack& track = (*t);
                 size_t ec = track.events.size();
-                nextTime[i] = ec ? track.events[0]->deltatime : std::numeric_limits<double>::max();
+                nextTime[i] = ec ? track.events[0]->tick : std::numeric_limits<double>::max();
                 nextIndex[i] = ec ? 0 : -1;
             }
             
@@ -149,7 +149,7 @@ namespace Lab {
                 ++nextIndex[nt];
                 int n = nextIndex[nt];
                 if (n < s->tracks[nt].events.size())
-                    nextTime[nt] += _detail->ticksToSeconds(s->tracks[nt].events[n]->deltatime);
+                    nextTime[nt] += _detail->ticksToSeconds(s->tracks[nt].events[n]->tick);
             } while (true);
         }
     }
