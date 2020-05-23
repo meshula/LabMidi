@@ -98,30 +98,33 @@ namespace Lab {
             cd.componentManufacturer = kAudioUnitManufacturer_Apple;
             cd.componentFlags = 0;
             cd.componentFlagsMask = 0;
-            
-            require_noerr (result = NewAUGraph (&auGraph), home);
+           
+            if (0 != NewAUGraph (&auGraph))
+            { shutdown(); return; }
             
             cd.componentType = kAudioUnitType_MusicDevice;
             cd.componentSubType = kAudioUnitSubType_DLSSynth;
             
-            require_noerr (result = AUGraphAddNode (auGraph, &cd, &synthNode), home);
+            if (0 != AUGraphAddNode (auGraph, &cd, &synthNode))
+            { shutdown(); return; }
             
             cd.componentType = kAudioUnitType_Effect;
             cd.componentSubType = kAudioUnitSubType_PeakLimiter;
             
-            require_noerr (result = AUGraphAddNode (auGraph, &cd, &limiterNode), home);
-            
+            if (0 != AUGraphAddNode (auGraph, &cd, &limiterNode))
+            { shutdown(); return; }
+                
             cd.componentType = kAudioUnitType_Output;
             cd.componentSubType = kAudioUnitSubType_DefaultOutput;
-            require_noerr (result = AUGraphAddNode (auGraph, &cd, &outNode), home);
+            if (0 != AUGraphAddNode (auGraph, &cd, &outNode)) { shutdown(); return; }
             
-            require_noerr (result = AUGraphOpen (auGraph), home);
+            if (0 !=  AUGraphOpen (auGraph)) { shutdown(); return; }
             
-            require_noerr (result = AUGraphConnectNodeInput(auGraph, synthNode, 0, limiterNode, 0), home);
-            require_noerr (result = AUGraphConnectNodeInput(auGraph, limiterNode, 0, outNode, 0), home);
+            if (0 !=  AUGraphConnectNodeInput(auGraph, synthNode, 0, limiterNode, 0)) { shutdown(); return; }
+            if (0 !=  AUGraphConnectNodeInput(auGraph, limiterNode, 0, outNode, 0)) { shutdown(); return; }
             
             // ok we're good to go - get the Synth Unit...
-            require_noerr (result = AUGraphNodeInfo(auGraph, synthNode, 0, &synthUnit), home);
+            if (0 !=  AUGraphNodeInfo(auGraph, synthNode, 0, &synthUnit)) { shutdown(); return; }
             
             // if the user supplies a sound bank, we'll set that before we initialize and start playing
             if (bankPath)
@@ -130,33 +133,33 @@ namespace Lab {
                 CFURLRef url = CFURLCreateFromFileSystemRepresentation(kCFAllocatorDefault, (const UInt8 *)bankPath, strlen(bankPath), false);
 
                 if (url) {
-                    require_noerr (result = AudioUnitSetProperty(synthUnit,
+                    if (0 !=  AudioUnitSetProperty(synthUnit,
                                                                  kMusicDeviceProperty_SoundBankURL, kAudioUnitScope_Global,
                                                                  0,
                                                                  &url, sizeof(url)
-                                                                 ), home);
+                                                                 )) { shutdown(); return; }
 
                     CFRelease(url);
                 }
             }
             
             // ok we're set up to go - initialize and start the graph
-            require_noerr (result = AUGraphInitialize (auGraph), home);
+            if (0 !=  AUGraphInitialize (auGraph)) { shutdown(); return; }
             
             //set our bank
-            require_noerr (result = MusicDeviceMIDIEvent(synthUnit,
+            if (0 !=  MusicDeviceMIDIEvent(synthUnit,
                                                          kMidiMessage_ControlChange << 4 | midiChannelInUse,
                                                          kMidiMessage_BankMSBControl, 0,
-                                                         0/*sample offset*/), home);
+                                                         0/*sample offset*/)) { shutdown(); return; }
             
-            require_noerr (result = MusicDeviceMIDIEvent(synthUnit,
+            if (0 !=  MusicDeviceMIDIEvent(synthUnit,
                                                          kMidiMessage_ProgramChange << 4 | midiChannelInUse,
                                                          0/*prog change num*/, 0,
-                                                         0/*sample offset*/), home);
+                                                         0/*sample offset*/)) { shutdown(); return; }
             
             CAShow(auGraph); // prints out the graph so we can see what it looks like...
             
-            require_noerr (result = AUGraphStart(auGraph), home);
+            if (0 !=  AUGraphStart(auGraph)) { shutdown(); return; }
             return;
             
         home:
@@ -174,10 +177,7 @@ namespace Lab {
         
         void command(const MidiCommand* c)
         {
-            OSStatus result;
-            require_noerr(result = MusicDeviceMIDIEvent(synthUnit, c->command, c->byte1, c->byte2, 0), home);
-            return;
-        home: ;
+             MusicDeviceMIDIEvent(synthUnit, c->command, c->byte1, c->byte2, 0);
         }
 
         

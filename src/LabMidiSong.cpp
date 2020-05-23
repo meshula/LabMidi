@@ -341,6 +341,9 @@ MidiEvent* parseEvent(uint8_t const*& dataStart, uint8_t lastEventTypeByte)
             Midi_MetaEventType subtype = static_cast<Midi_MetaEventType>(*dataStart++);
             int length = read_variable_length(dataStart);
             switch(subtype) {
+            default:
+                throw std::invalid_argument("Unhandled meta event");
+
             case Midi_MetaEventType::SEQUENCE_NUMBER: {
                 if (length != 2) throw std::invalid_argument("Expected length for sequenceNumber event is 2");
                 auto event = new Event_SequenceNumber();

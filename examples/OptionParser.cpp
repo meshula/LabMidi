@@ -863,7 +863,7 @@ std::string OptionParser::Canonicalize(const std::string& commandLine)
             vector<Option*>::const_iterator j;
             for (j = options.begin(); j != options.end(); ++j)
             {
-                if ((argType == shortArg) && ((*j)->ShortName() == arg) ||
+                if (((argType == shortArg) && (((*j)->ShortName() == arg))) ||
                     ((*j)->LongName() == arg))
                 {
                     if ((*j)->HasArgument())
