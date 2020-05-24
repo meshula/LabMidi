@@ -93,8 +93,9 @@ add_library(liblabmidi STATIC
     ${labmidi_src} 
     ${rtmidi_src})
 
+target_include_directories(liblabmidi PUBLIC
+    ${LABMIDI_ROOT}/include)
 target_include_directories(liblabmidi PRIVATE
-    ${LABMIDI_ROOT}/include
     ${LABMIDI_ROOT}/third-party/rtmidi-1.0.15
     ${LABMIDI_ROOT}/src
     ${LABMIDI_INC})
