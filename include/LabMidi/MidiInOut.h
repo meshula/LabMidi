@@ -60,9 +60,9 @@ namespace Lab {
     0xF3     0sssssss Song to be played
     0xF6     upon reception, all analog synthesizers should tune their oscillators
     0xF7     end of excclusive, used to terminate system exclusive dump.
-    */
+*/
 
-    // channel info (MSN=command LSN=channel)
+// channel info (MSN=command LSN=channel)
 #define MIDI_NOTE_OFF           0x80
 #define MIDI_NOTE_ON            0x90
 #define MIDI_POLY_PRESSURE      0xA0

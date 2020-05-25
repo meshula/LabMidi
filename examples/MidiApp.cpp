@@ -270,12 +270,13 @@ MidiApp::MidiApp()
 {
 #define TEST 0
     switch (TEST) {
-        case 0: _detail->testMidi = new TestSoftSynth("resources/rachmaninov3.mid"); break;
-        case 1: _detail->testMidi = new TestSoftSynth("resources/209-Tchaikovsky - Russian Dance (Nutcracker)"); break;
-        case 2: _detail->testMidi = new TestSoftSynth(MMLtune, true); break;
-        case 3: _detail->testMidi = new TestInOut(); break;
-        case 4: _detail->testMidi = new TestFrequencyCalc(); break;
-        case 5: _detail->testMidi = new TestSoftSynth("resources/106-Grieg - In the Hall of the Mountain King (Peer Gynt)"); break;
+        case 0: _detail->testMidi = new TestSoftSynth("assets/venture.mid"); break;
+        case 1: _detail->testMidi = new TestSoftSynth("resources/rachmaninov3.mid"); break;
+        case 2: _detail->testMidi = new TestSoftSynth("resources/209-Tchaikovsky - Russian Dance (Nutcracker)"); break;
+        case 3: _detail->testMidi = new TestSoftSynth(MMLtune, true); break;
+        case 4: _detail->testMidi = new TestInOut(); break;
+        case 5: _detail->testMidi = new TestFrequencyCalc(); break;
+        case 6: _detail->testMidi = new TestSoftSynth("resources/106-Grieg - In the Hall of the Mountain King (Peer Gynt)"); break;
     }
 
     _detail->startTime = getElapsedSeconds();

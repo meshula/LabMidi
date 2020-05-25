@@ -32,6 +32,7 @@
 #pragma once
 
 #include <algorithm>
+#include <memory>
 #include <ostream>
 #include <vector>
 
@@ -56,6 +57,7 @@ namespace Lab {
         PATCH_NAME = 0x08,
         DEVICE_NAME = 0x09,
         MIDI_CHANNEL_PREFIX = 0x20,
+        WHAT_is_THIS = 0x21,
         END_OF_TRACK = 0x2F,
         TEMPO_CHANGE = 0x51,
         SMPTE_OFFSET = 0x54,
@@ -75,7 +77,8 @@ namespace Lab {
 
     struct MidiEvent {
         MidiEvent(Midi_MetaEventType s) : eventType(s), tick(0) { }
-        virtual ~MidiEvent() { }
+        ~MidiEvent() = default;
+
         Midi_MetaEventType eventType;
         int tick;
         std::vector<uint8_t> data;
@@ -123,6 +126,11 @@ namespace Lab {
 
     class MidiTrack {
     public:
+        ~MidiTrack()
+        {
+            for (auto e : events)
+                delete e;
+        }
         std::vector<MidiEvent*> events;
     };
 
@@ -144,7 +152,7 @@ namespace Lab {
         
         float ticksPerBeat = 1;   // precision (number of ticks distinguishable per second)
         float startingTempo = 120;
-        std::vector<MidiTrack> tracks;
+        std::vector<std::shared_ptr<MidiTrack>> tracks;
     };
 
 } // Lab

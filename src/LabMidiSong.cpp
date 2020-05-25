@@ -341,13 +341,23 @@ MidiEvent* parseEvent(uint8_t const*& dataStart, uint8_t lastEventTypeByte)
             Midi_MetaEventType subtype = static_cast<Midi_MetaEventType>(*dataStart++);
             int length = read_variable_length(dataStart);
             switch(subtype) {
+
+            case Midi_MetaEventType::WHAT_is_THIS: {
+                dataStart += length;
+                auto event = new Event_Unknown();
+                return event;
+            }
+
             default:
                 throw std::invalid_argument("Unhandled meta event");
 
             case Midi_MetaEventType::SEQUENCE_NUMBER: {
-                if (length != 2) throw std::invalid_argument("Expected length for sequenceNumber event is 2");
+                if (length > 2) throw std::invalid_argument("Expected length for sequenceNumber event is 1 or 2");
                 auto event = new Event_SequenceNumber();
-                event->number = *(uint16_t*)dataStart;
+                if (length == 1)
+                    event->number = *dataStart;
+                else
+                    event->number = *(uint16_t*)dataStart;
                 dataStart += 2;
                 return event;
             }
@@ -610,8 +620,8 @@ void MidiSong::parse(uint8_t const*const a, size_t length, bool verbose)
                 return;
             }
 
-            tracks.emplace_back(MidiTrack{});
-            MidiTrack* track = &tracks.back();
+            tracks.emplace_back(std::make_shared<MidiTrack>());
+            auto track = tracks.back();
             uint8_t const* dataEnd = dataStart + headerLength;
             uint8_t runningEvent = 0;
             while (dataStart < dataEnd) {
@@ -663,9 +673,9 @@ void MidiSong::writeMidi(std::ostream& out)
 
     std::vector<uint8_t> trackRawData;
 
-    for (MidiTrack& midi_track : tracks)
+    for (auto midi_track : tracks)
     {
-        for (MidiEvent* event : midi_track.events)
+        for (MidiEvent* event : midi_track->events)
         {
             const Midi_MetaEventType msg = event->eventType;
 
@@ -821,8 +831,8 @@ void MidiSong::parseMML(char const*const mmlStr, size_t length, bool verbose)
     int len = 8;        // an 1/8th note
     
     clearTracks();
-    tracks.emplace_back(MidiTrack{});
-    MidiTrack* track = &tracks.back();
+    tracks.emplace_back(std::make_shared<MidiTrack>());
+    auto track = tracks.back();
     
     do {
         char c = *curr++;
@@ -859,7 +869,7 @@ void MidiSong::parseMML(char const*const mmlStr, size_t length, bool verbose)
                 i = 0;
             if (i > 127)
                 i = 127;
-            storeMMLEvent(track, MIDI_PROGRAM_CHANGE | tr, i, 0xff, 0);
+            storeMMLEvent(track.get(), MIDI_PROGRAM_CHANGE | tr, i, 0xff, 0);
             break;
         }
             
@@ -882,8 +892,8 @@ void MidiSong::parseMML(char const*const mmlStr, size_t length, bool verbose)
             if (tr > 15)
                 tr = 15;
             while (tr >= tracks.size())
-                tracks.emplace_back(MidiTrack{});
-            track = &tracks[tr];
+                tracks.emplace_back(std::make_shared<MidiTrack>());
+            track = tracks[tr];
             break;
         
         case 'c':
@@ -892,13 +902,13 @@ void MidiSong::parseMML(char const*const mmlStr, size_t length, bool verbose)
             int duration = dotted(curr, tempo, static_cast<int>(ticksPerBeat), len);
             // note output { tr, cnt, size 3, 0x90|tr note & 0x7f vol=0x7f }
             if (!tied) {
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0, duration);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0, duration);
             }
             else {
                 // note output { tr, cnt-1, size 3, 0x90|tr note & 0x7f vol=0x00 }
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, duration);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, duration);
                 tied = false;
             }
             break;
@@ -909,13 +919,13 @@ void MidiSong::parseMML(char const*const mmlStr, size_t length, bool verbose)
             int duration = dotted(curr, tempo, static_cast<int>(ticksPerBeat), len);
             // note output { tr, cnt, size 3, 0x90|tr note & 0x7f vol=0x7f }
             if (!tied) {
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0, duration);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0, duration);
             }
             else {
                 // note output { tr, cnt-1, size 3, 0x90|tr note & 0x7f vol=0x00 }
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, duration);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, duration);
                 tied = false;
             }
             break;
@@ -926,13 +936,13 @@ void MidiSong::parseMML(char const*const mmlStr, size_t length, bool verbose)
             int duration = dotted(curr, tempo, static_cast<int>(ticksPerBeat), len);
             // note output { tr, cnt, size 3, 0x90|tr note & 0x7f vol=0x7f }
             if (!tied) {
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0, duration);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0, duration);
             }
             else {
                 // note output { tr, cnt-1, size 3, 0x90|tr note & 0x7f vol=0x00 }
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, duration);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, duration);
                 tied = false;
             }
             break;
@@ -943,13 +953,13 @@ void MidiSong::parseMML(char const*const mmlStr, size_t length, bool verbose)
             int duration = dotted(curr, tempo, static_cast<int>(ticksPerBeat), len);
             // note output { tr, cnt, size 3, 0x90|tr note & 0x7f vol=0x7f }
             if (!tied) {
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0, duration);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0, duration);
             }
             else {
                 // note output { tr, cnt-1, size 3, 0x90|tr note & 0x7f vol=0x00 }
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, duration);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, duration);
                 tied = false;
             }
             break;
@@ -960,13 +970,13 @@ void MidiSong::parseMML(char const*const mmlStr, size_t length, bool verbose)
             int duration = dotted(curr, tempo, static_cast<int>(ticksPerBeat), len);
             // note output { tr, cnt, size 3, 0x90|tr note & 0x7f vol=0x7f }
             if (!tied) {
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0, duration);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0, duration);
             }
             else {
                 // note output { tr, cnt-1, size 3, 0x90|tr note & 0x7f vol=0x00 }
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, duration);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, duration);
                 tied = false;
             }
             break;
@@ -977,13 +987,13 @@ void MidiSong::parseMML(char const*const mmlStr, size_t length, bool verbose)
             int duration = dotted(curr, tempo, static_cast<int>(ticksPerBeat), len);
             // note output { tr, cnt, size 3, 0x90|tr note & 0x7f vol=0x7f }
             if (!tied) {
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0, duration);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0, duration);
             }
             else {
                 // note output { tr, cnt-1, size 3, 0x90|tr note & 0x7f vol=0x00 }
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, duration);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, duration);
                 tied = false;
             }
             break;
@@ -994,13 +1004,13 @@ void MidiSong::parseMML(char const*const mmlStr, size_t length, bool verbose)
             int duration = dotted(curr, tempo, static_cast<int>(ticksPerBeat), len);
             // note output { tr, cnt, size 3, 0x90|tr note & 0x7f vol=0x7f }
             if (!tied) {
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0, duration);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0, duration);
             }
             else {
                 // note output { tr, cnt-1, size 3, 0x90|tr note & 0x7f vol=0x00 }
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
-                storeMMLEvent(track, MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, duration);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, 0);
+                storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, note & 0x7f, 0x7f, duration);
                 tied = false;
             }
             break;
@@ -1012,7 +1022,7 @@ void MidiSong::parseMML(char const*const mmlStr, size_t length, bool verbose)
             
         case 'r': // rest
         case 'R':
-            storeMMLEvent(track, MIDI_NOTE_ON | tr, 0, 0, dotted(curr, tempo, static_cast<int>(ticksPerBeat), len));
+            storeMMLEvent(track.get(), MIDI_NOTE_ON | tr, 0, 0, dotted(curr, tempo, static_cast<int>(ticksPerBeat), len));
             tied = false;
             break;
             

@@ -122,9 +122,8 @@ namespace Lab {
             
             int i = 0;
             for (auto t = s->tracks.begin(); t != s->tracks.end(); ++t, ++i) {
-                MidiTrack& track = (*t);
-                size_t ec = track.events.size();
-                nextTime[i] = ec ? track.events[0]->tick : std::numeric_limits<double>::max();
+                size_t ec = (*t)->events.size();
+                nextTime[i] = ec ? (*t)->events[0]->tick : std::numeric_limits<double>::max();
                 nextIndex[i] = ec ? 0 : -1;
             }
             
@@ -132,7 +131,7 @@ namespace Lab {
                 double nextEventT = std::numeric_limits<double>::max();
                 int nt = -1;
                 for (int i = 0; i < tc; ++i) {
-                    if (nextIndex[i] >= s->tracks[i].events.size())
+                    if (nextIndex[i] >= s->tracks[i]->events.size())
                         continue;
                     if (nextTime[i] < nextEventT) {
                         nt = i;
@@ -142,12 +141,12 @@ namespace Lab {
                 if (nt == -1)
                     break;
                 
-                MidiEvent* ev = s->tracks[nt].events[nextIndex[nt]];
+                MidiEvent* ev = s->tracks[nt]->events[nextIndex[nt]];
                 _detail->recordEvent(nextTime[nt], ev);
                 ++nextIndex[nt];
                 int n = nextIndex[nt];
-                if (n < s->tracks[nt].events.size())
-                    nextTime[nt] += _detail->ticksToSeconds(s->tracks[nt].events[n]->tick);
+                if (n < s->tracks[nt]->events.size())
+                    nextTime[nt] += _detail->ticksToSeconds(s->tracks[nt]->events[n]->tick);
             } while (true);
         }
     }
