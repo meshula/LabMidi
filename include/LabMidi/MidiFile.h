@@ -109,7 +109,7 @@ namespace Lab {
     struct Event_SmpteOffset : public MidiEvent {
         Event_SmpteOffset() : MidiEvent(Midi_MetaEventType::SMPTE_OFFSET) {} uint8_t framerate = 0; uint8_t hour = 0; uint8_t min = 0; uint8_t sec = 0; uint8_t frame = 0; uint8_t subframe = 0; };
     struct Event_TimeSignature : public MidiEvent {
-        Event_TimeSignature() : MidiEvent(Midi_MetaEventType::TIME_SIGNATURE) {}  uint8_t numerator = 0; int denominator = 0; uint8_t metronome = 0; uint8_t thirtyseconds = 0; };
+        Event_TimeSignature() : MidiEvent(Midi_MetaEventType::TIME_SIGNATURE) {}  double timeSignature = 120.; uint8_t metronome = 0; uint8_t thirtyseconds = 0; };
     struct Event_KeySignature : public MidiEvent {
         Event_KeySignature() : MidiEvent(Midi_MetaEventType::KEY_SIGNATURE) {} uint8_t key = 0; uint8_t scale = 0; };
     struct Event_SequencerSpecific : public MidiEvent {

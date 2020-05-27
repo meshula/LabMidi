@@ -171,10 +171,10 @@ namespace mm
         // Standard Message
         NOTE_OFF           = 0x80,
         NOTE_ON            = 0x90,
-        POLY_PRESSURE      = 0xA0,
+        POLY_PRESSURE      = 0xA0, // after touch
         CONTROL_CHANGE     = 0xB0,
         PROGRAM_CHANGE     = 0xC0,
-        AFTERTOUCH         = 0xD0,
+        AFTERTOUCH         = 0xD0, // channel pressure
         PITCH_BEND         = 0xE0,
         
         // System Common Messages
@@ -301,6 +301,8 @@ inline uint32_t read_variable_length(uint8_t const *& data)
         }
     }
 }
+
+// in the names that follow, be = big endian
 
 inline uint16_t read_uint16_be(uint8_t const *& data)
 {
@@ -441,8 +443,7 @@ MidiEvent* parseEvent(uint8_t const*& dataStart, uint8_t lastEventTypeByte)
             case Midi_MetaEventType::TIME_SIGNATURE: {
                 if (length != 4) throw std::invalid_argument("Expected length for TIME_SIGNATURE event is 4");
                 auto event = new Event_TimeSignature();
-                event->numerator = *dataStart++;
-                event->denominator = int(powf(2.0f, float(*dataStart++)));
+                event->timeSignature = double(*dataStart++) / double(std::pow(2, *dataStart++));
                 event->metronome = *dataStart++;
                 event->thirtyseconds = *dataStart++;
                 return event;
@@ -450,8 +451,8 @@ MidiEvent* parseEvent(uint8_t const*& dataStart, uint8_t lastEventTypeByte)
             case Midi_MetaEventType::KEY_SIGNATURE: {
                 if (length != 2) throw std::invalid_argument("Expected length for KEY_SIGNATURE event is 2");
                 auto event = new Event_KeySignature();
-                event->key = *dataStart++;
-                event->scale = *dataStart++;
+                event->key = *dataStart++;    // key shift
+                event->scale = *dataStart++;  // if not zero, key is minor
                 return event;
             }
             case Midi_MetaEventType::PROPRIETARY: {
@@ -559,10 +560,10 @@ void MidiSong::clearTracks()
 }
 
 
-void MidiSong::parse(uint8_t const*const a, size_t length, bool verbose)
+void MidiSong::parse(uint8_t const*const input_data, size_t length, bool verbose)
 {
-    uint8_t const* file = a;
-    uint8_t* b = 0;
+    uint8_t const* file = input_data;
+    std::vector<uint8_t> parse_buffer;
     
     // Check if the MIDI file has been base64 encoded using the same scheme
     // Euphony has in its tracks files.
@@ -571,9 +572,9 @@ void MidiSong::parse(uint8_t const*const a, size_t length, bool verbose)
     const char* base64Test = "data:audio/midi;base64,";
     size_t base64TestLen = strlen(base64Test);
     if (!strncmp((const char*) file, base64Test, base64TestLen)) {
-        b = new uint8_t[length];
-        decode64(a + base64TestLen, b, length - base64TestLen);
-        file = b;
+        parse_buffer.resize(length); // the decoded data will be smaller than length.
+        decode64(input_data + base64TestLen, parse_buffer.data(), length - base64TestLen);
+        file = parse_buffer.data();
     }
 
     clearTracks();
@@ -590,23 +591,42 @@ void MidiSong::parse(uint8_t const*const a, size_t length, bool verbose)
 
     // Midi Format 0 is a single track
     // Midi Format 1 has multiple same length tracks
-    // Midi Format 2 has multiple tracks of arbitrary lengths and starts, typically used as clips
-    /*int formatType = */ read_uint16_be(dataStart);
+    // Midi Format 2 has multiple tracks of arbitrary lengths and starts, typically used as clips, or multiple songs
+    int formatType = read_uint16_be(dataStart);
+
+    if (formatType == 2) {
+        if (verbose)
+            std::cerr << "Multiple songs format not supported" << std::endl;
+        return;
+    }
+
     uint16_t trackCount = read_uint16_be(dataStart);
     uint16_t timeDivision = read_uint16_be(dataStart);
+
+    int ticksPerFrame;
+    float framesPerSecond;
+    int unitsPerQuarterNote;
     
     // CBB: deal with the SMPTE style time coding
     // timeDivision is described here http://www.sonicspot.com/guide/midifiles.html
     if (timeDivision & 0x8000) {
-        if (verbose)
-            std::cerr << "Found SMPTE time frames" << std::endl;
-        //int fps = (timeDivision >> 16) & 0x7f;
-        //int ticksPerFrame = timeDivision & 0xff;
-        // given beats per second, timeDivision should be derivable.
-        return;
+        ticksPerFrame = timeDivision & 0xFF;
+        uint16_t framesPerSecondsIndicator = ((timeDivision >> 8) & 0b1100000) >> 5;
+        framesPerSecond = (framesPerSecondsIndicator == 0 ? 24.0f : (framesPerSecondsIndicator == 1 ? 25.0f : (framesPerSecondsIndicator == 2 ? 29.97f : 30.0f)));
+        std::cout << "[INFO]: " << ticksPerFrame << " units per frame, " << framesPerSecond << " frames per second." << std::endl;
+        unitsPerQuarterNote = 0;
+    }
+    else
+    {
+        // Remove 15th bit.
+        unitsPerQuarterNote = timeDivision ^ (timeDivision & (0x1 << 15));
+        std::cout << "[INFO]: " << unitsPerQuarterNote << " units per quarter note ." << std::endl;
+
+        ticksPerFrame = 0;
+        framesPerSecond = 0.0f;
     }
     
-    startingTempo = 120.0f;
+    startingTempo = 0.0f;
     ticksPerBeat = float(timeDivision); // ticks per beat (a beat is defined as a quarter note)
                                         // commonly 48 to 960.
     
@@ -624,6 +644,7 @@ void MidiSong::parse(uint8_t const*const a, size_t length, bool verbose)
             auto track = tracks.back();
             uint8_t const* dataEnd = dataStart + headerLength;
             uint8_t runningEvent = 0;
+            float tempo = 0.f;
             while (dataStart < dataEnd) {
                 int duration = read_variable_length(dataStart);
                 MidiEvent* ev = parseEvent(dataStart, runningEvent);
@@ -631,14 +652,20 @@ void MidiSong::parse(uint8_t const*const a, size_t length, bool verbose)
                 if (ev->data.size() > 0)
                     runningEvent = ev->data[0];
                 track->events.push_back(ev);
+                if (ev->eventType == Midi_MetaEventType::TEMPO_CHANGE)
+                {
+                    Event_SetTempo* set_tempo = reinterpret_cast<Event_SetTempo*>(ev);
+                    startingTempo = 60000000.0f / float(set_tempo->microsecondsPerBeat);
+                }
             }
         }
     }
     catch(...)
     {
     }
-    
-    delete [] b;
+
+    if (startingTempo <= 0.f)
+        startingTempo = 120.f;
 }
 
 void MidiSong::parse(char const*const path, bool verbose)
@@ -648,12 +675,11 @@ void MidiSong::parse(char const*const path, bool verbose)
         fseek(f, 0, SEEK_END);
         int l = ftell(f);
         fseek(f, 0, SEEK_SET);
-        uint8_t* a = new uint8_t[l];
-        fread(a, 1, l, f);
+        std::vector<uint8_t> a(l);
+        fread(a.data(), 1, l, f);
         fclose(f);
 
-        parse(a, l, verbose);
-        delete [] a;
+        parse(a.data(), l, verbose);
     }
 }
 
