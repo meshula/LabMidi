@@ -93,7 +93,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <stdexcept>
 #include <iostream>
-#include <math.h>
+#include <cmath>
 #include <stdint.h>
 #include <string.h>
 #include <vector>
@@ -443,7 +443,9 @@ MidiEvent* parseEvent(uint8_t const*& dataStart, uint8_t lastEventTypeByte)
             case Midi_MetaEventType::TIME_SIGNATURE: {
                 if (length != 4) throw std::invalid_argument("Expected length for TIME_SIGNATURE event is 4");
                 auto event = new Event_TimeSignature();
-                event->timeSignature = double(*dataStart++) / double(std::pow(2, *dataStart++));
+                double num = double(*dataStart++);
+                double denom = double(*dataStart++);
+                event->timeSignature = num / std::powf(2., denom);
                 event->metronome = *dataStart++;
                 event->thirtyseconds = *dataStart++;
                 return event;
