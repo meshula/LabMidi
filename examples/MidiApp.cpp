@@ -47,6 +47,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <time.h>
 #include <sys/time.h>
 #include <unistd.h>
+#include <cstring>
 #endif
 
 void midiPrintCallback(void* userData, Lab::MidiCommand* c)

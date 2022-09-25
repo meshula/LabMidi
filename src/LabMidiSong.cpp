@@ -445,7 +445,7 @@ MidiEvent* parseEvent(uint8_t const*& dataStart, uint8_t lastEventTypeByte)
                 auto event = new Event_TimeSignature();
                 double num = double(*dataStart++);
                 double denom = double(*dataStart++);
-                event->timeSignature = num / std::powf(2., denom);
+                event->timeSignature = num / std::pow(2., denom);
                 event->metronome = *dataStart++;
                 event->thirtyseconds = *dataStart++;
                 return event;
