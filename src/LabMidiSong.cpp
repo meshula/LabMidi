@@ -94,7 +94,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stdexcept>
 #include <iostream>
 #include <cmath>
-#include <math.h>
 #include <stdint.h>
 #include <string.h>
 #include <vector>
