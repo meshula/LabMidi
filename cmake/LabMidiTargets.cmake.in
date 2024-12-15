@@ -1,11 +1,4 @@
-if(NOT TARGET liblabmidi)
-    include("${CMAKE_CURRENT_LIST_DIR}/LabMidiTargets.cmake")
-endif()
-
-# Ensure dependencies are available
-if(NOT TARGET liblabmidi)
-    message(FATAL_ERROR "LabMidi targets not found. This is likely a bug.")
-endif()
+# This file is included by LabMidiConfig.cmake to set up platform-specific properties
 
 # Platform-specific target properties
 if(WIN32)
