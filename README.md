@@ -36,11 +36,40 @@ Like ofxMidi, I'm thinking of using PGMidi <https://github.com/petegoodliffe/PGM
 
 Building
 --------
-CMake 3.10 or greater is required for building. Building in the usual way should work out of the box, as LabMidi
+CMake 3.15 or greater is required for building. Building in the usual way should work out of the box, as LabMidi
 has no external dependencies.
+
+Build Options:
+- LABMIDI_BUILD_EXAMPLES (ON/OFF): Build example applications (default: ON)
+- LABMIDI_BUILD_SHARED_LIBS (ON/OFF): Build as shared libraries (default: OFF)
+- LABMIDI_INSTALL (ON/OFF): Generate installation target (default: ON)
+
+Example:
+```cmake
+cmake -B build -DLABMIDI_BUILD_EXAMPLES=ON
+cmake --build build
+```
 
 Usage
 -----
+LabMidi can be used in other CMake projects either via find_package() or FetchContent:
+
+```cmake
+# Option 1: Using find_package
+find_package(LabMidi REQUIRED)
+target_link_libraries(your_target PRIVATE Lab::Midi)
+
+# Option 2: Using FetchContent
+include(FetchContent)
+FetchContent_Declare(
+    labmidi
+    GIT_REPOSITORY your_repo_url
+    GIT_TAG your_tag
+)
+FetchContent_MakeAvailable(labmidi)
+target_link_libraries(your_target PRIVATE Lab::Midi)
+```
+
 See the MidiApp source for examples of usage. Note that MidiApp.cpp currently has hard coded paths to the midi sample files.
 You'll need to make sure you've set your working directory to the folder containing the resources folder. In XCode, under the Product menu, select Edit Schemes..., then the Options tab, then the target you want to run, and click the Use Custom Working Directory box. Fill in the path appropriately.
 
