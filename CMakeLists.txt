@@ -199,6 +199,13 @@ if(LABMIDI_INSTALL)
         FILES_MATCHING PATTERN "*.h"
     )
 
+    # Configure and install targets file
+    configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/LabMidiTargets.cmake.in
+        ${CMAKE_CURRENT_BINARY_DIR}/LabMidiTargets.cmake
+        @ONLY
+    )
+
     # Export targets
     install(EXPORT LabMidiTargets
         FILE LabMidiTargets.cmake
@@ -219,6 +226,7 @@ if(LABMIDI_INSTALL)
         COMPATIBILITY SameMajorVersion
     )
 
+    # Install config files
     install(FILES
         ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfig.cmake
         ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfigVersion.cmake
