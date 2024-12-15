@@ -25,18 +25,19 @@ endif()
 #------------------------------------------------------------------------------
 # Dependencies
 
+set(LABMIDI_INTERFACE_DEFS)
 set(LABMIDI_PRIVATE_DEFS)
 set(LABMIDI_PUBLIC_LIBS)
 set(LABMIDI_PRIVATE_LIBS)
 set(LABMIDI_PRIVATE_INCLUDES)
 
 if(WIN32)
-    list(APPEND LABMIDI_PRIVATE_DEFS 
+    list(APPEND LABMIDI_INTERFACE_DEFS 
         __WINDOWS_MM__
         _CRT_SECURE_NO_WARNINGS)
     list(APPEND LABMIDI_PUBLIC_LIBS winmm)
 elseif(APPLE)
-    list(APPEND LABMIDI_PRIVATE_DEFS __MACOSX_CORE__)
+    list(APPEND LABMIDI_INTERFACE_DEFS __MACOSX_CORE__)
     list(APPEND LABMIDI_PUBLIC_LIBS 
         "-framework CoreFoundation" 
         "-framework CoreMidi" 
@@ -50,7 +51,7 @@ elseif(UNIX)
         set(HAVE_JACK TRUE)
         set(NEED_PTHREAD ON)
         list(APPEND PKGCONFIG_REQUIRES "jack")
-        list(APPEND LABMIDI_PRIVATE_DEFS "__LINUX_JACK__")
+        list(APPEND LABMIDI_INTERFACE_DEFS "__LINUX_JACK__")
         if(jack_FOUND)
             list(APPEND LABMIDI_PRIVATE_LIBS ${jack_LIBRARIES})
             list(APPEND LABMIDI_PRIVATE_INCLUDES ${jack_INCLUDEDIR})
@@ -62,7 +63,7 @@ elseif(UNIX)
         set(NEED_PTHREAD ON)
         list(APPEND LABMIDI_PRIVATE_LIBS ${ALSA_LIBRARY})
         list(APPEND LABMIDI_PRIVATE_INCLUDES ${ALSA_INCLUDE_DIR})
-        list(APPEND LABMIDI_PRIVATE_DEFS "__LINUX_ALSASEQ__")
+        list(APPEND LABMIDI_INTERFACE_DEFS "__LINUX_ALSASEQ__")
     endif()
 
     if(NEED_PTHREAD)
@@ -72,6 +73,9 @@ elseif(UNIX)
         list(APPEND LABMIDI_PRIVATE_LIBS Threads::Threads)
     endif()
 endif()
+
+# Add RtMidi-specific definitions
+list(APPEND LABMIDI_PRIVATE_DEFS RTMIDI_DO_NOT_ENSURE_UNIQUE_PORTNAMES)
 
 #------------------------------------------------------------------------------
 # Core Library
@@ -127,6 +131,7 @@ target_include_directories(liblabmidi
 
 # Compile definitions and link libraries
 target_compile_definitions(liblabmidi
+    PUBLIC ${LABMIDI_INTERFACE_DEFS}
     PRIVATE ${LABMIDI_PRIVATE_DEFS}
 )
 
