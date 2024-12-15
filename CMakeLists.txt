@@ -183,12 +183,31 @@ if(LABMIDI_BUILD_EXAMPLES)
 endif()
 
 #------------------------------------------------------------------------------
-# Installation
+# Installation and Export
+
+include(CMakePackageConfigHelpers)
+include(GNUInstallDirs)
+
+# Export targets for build tree
+export(EXPORT LabMidiTargets
+    FILE "${CMAKE_CURRENT_BINARY_DIR}/LabMidiTargets.cmake"
+    NAMESPACE Lab::
+)
+
+# Create the config file for the build tree
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/LabMidiConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_CURRENT_BINARY_DIR}
+)
+
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
 
 if(LABMIDI_INSTALL)
-    include(CMakePackageConfigHelpers)
-    include(GNUInstallDirs)
-
     # Install library and headers
     install(TARGETS liblabmidi
         EXPORT LabMidiTargets
@@ -204,31 +223,26 @@ if(LABMIDI_INSTALL)
         FILES_MATCHING PATTERN "*.h"
     )
 
-    # Export targets
+    # Export targets for install tree
     install(EXPORT LabMidiTargets
         FILE LabMidiTargets.cmake
         NAMESPACE Lab::
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi
     )
 
-    # Create and install config files
+    # Create and install config files for install tree
     configure_package_config_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/LabMidiConfig.cmake.in
-        ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfig.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfig.cmake.install
         INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi
-    )
-
-    write_basic_package_version_file(
-        ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfigVersion.cmake
-        VERSION ${PROJECT_VERSION}
-        COMPATIBILITY SameMajorVersion
     )
 
     # Install config files
     install(FILES
-        ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfig.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfig.cmake.install
         ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfigVersion.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi
+        RENAME LabMidiConfig.cmake
     )
 
     # Install examples if built
