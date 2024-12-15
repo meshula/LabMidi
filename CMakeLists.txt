@@ -207,7 +207,7 @@ if(LABMIDI_INSTALL)
     # Configure and install targets file
     configure_file(
         ${CMAKE_CURRENT_SOURCE_DIR}/cmake/LabMidiTargets.cmake.in
-        ${CMAKE_CURRENT_BINARY_DIR}/LabMidiTargets.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/LabMidiTargets-config.cmake
         @ONLY
     )
 
@@ -235,6 +235,7 @@ if(LABMIDI_INSTALL)
     install(FILES
         ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfig.cmake
         ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfigVersion.cmake
+        ${CMAKE_CURRENT_BINARY_DIR}/LabMidiTargets-config.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi
     )
 
