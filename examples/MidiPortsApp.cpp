@@ -35,15 +35,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // copyright notices.
 
 #include "MidiPortsApp.h"
-
-#include "LabMidi/Command.h"
-#include "LabMidi/In.h"
-#include "LabMidi/Out.h"
 #include "LabMidi/Ports.h"
-#include "LabMidi/SoftSynth.h"
-#include "LabMidi/Song.h"
-#include "LabMidi/SongPlayer.h"
-#include "LabMidi/Util.h"
 
 #include <iostream>
 
@@ -55,8 +47,6 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <sys/time.h>
 #include <unistd.h>
 #endif
-
-
 
 class MidiPortsApp::Detail
 {
