@@ -1,30 +1,6 @@
-# FindLabMidiConfig.cmake
-# This is the configuration file for the LabMidi library
-
-# Set the version
-set(LABMIDI_VERSION "${LabMidi_VERSION}")
-
-# Include directories for LabMidi
-if (TARGET LabMidi)
-    set(LabMidi_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/include" CACHE STRING "Include directories for LabMidi")
-else()
-    set(LabMidi_INCLUDE_DIRS "" CACHE STRING "Include directories for LabMidi")
-endif()
-
-# Libraries for LabMidi
-if (TARGET LabMidi)
-    set(LabMidi_LIBRARIES LabMidi CACHE STRING "Libraries for LabMidi")
-else()
-    set(LabMidi_LIBRARIES "" CACHE STRING "Libraries for LabMidi")
-endif()
-
-# Paths to the CMake modules for this package
-set(LabMidi_CMAKE_DIR "${CMAKE_INSTALL_PREFIX}/lib/cmake/LabMidi" CACHE STRING "Path to the CMake configuration directory")
-
-# Export variables for the package
-if (NOT TARGET LabMidi)
-    message(FATAL_ERROR "LabMidi target not found.")
-endif()
-
-# mark the package configuration as done
-set(LabMidi_FOUND TRUE)
+add_library(Lab::Midi SHARED IMPORTED)
+set_property(TARGET Lab::Midi APPEND PROPERTY IMPORTED_CONFIGURATIONS DEBUG)
+set_property(TARGET Lab::Midi APPEND PROPERTY IMPORTED_CONFIGURATIONS RELEASE)
+set_target_properties(Lab::Midi PROPERTIES IMPORTED_IMPLIB_RELEASE @CMAKE_INSTALL_PREFIX@/lib/LabMidi.lib)
+set_target_properties(Lab::Midi PROPERTIES IMPORTED_IMPLIB_DEBUG   @CMAKE_INSTALL_PREFIX@/lib/LabMidi_d.lib)
+set_property(TARGET Lab::Midi APPEND PROPERTY INTERFACE_INCLUDE_DIRECTORIES @CMAKE_INSTALL_PREFIX@/include)

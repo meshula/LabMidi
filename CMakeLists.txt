@@ -8,6 +8,9 @@ project(LabMidi
 # set c++ to 17
 set(CMAKE_CXX_STANDARD 17)
 
+set(LABMIDI_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
+
+
 option(LABMIDI_USE_RTMIDI6 "Enable RtMidi 6 support" ON)
 
 if(LABMIDI_USE_RTMIDI6)
@@ -63,36 +66,29 @@ target_include_directories(LabMidi PUBLIC include)
 target_link_libraries(LabMidi PRIVATE rtmidi)
 add_library(Lab::Midi ALIAS LabMidi)
 
+set_target_properties(
+    LabMidi
+    PROPERTIES
+        FOLDER "LabMidi"
+        POSITION_INDEPENDENT_CODE ON
+        PUBLIC_HEADER "${LABMIDI_HEADERS}"
+        OUTPUT_NAME "LabMidi"
+        OUTPUT_NAME_DEBUG "LabMidi_d"
+        INTERFACE_INCLUDE_DIRECTORIES ${LABMIDI_ROOT}/include
+)
+
 # Create configuration file for CMake package config
-configure_package_config_file(
-    "${CMAKE_CURRENT_LIST_DIR}/cmake/LabMidiConfig.cmake.in"
-    "${CMAKE_BINARY_DIR}/LabMidiConfig.cmake"
-    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi"
-)
-
-# Install package config file
-install(FILES "${CMAKE_BINARY_DIR}/LabMidiConfig.cmake"
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi)
-
-# Install the library
+configure_file(cmake/LabMidiConfig.cmake.in "${PROJECT_BINARY_DIR}/LabMidiConfig.cmake" @ONLY)
 install(TARGETS LabMidi
-    EXPORT LabMidiTargets
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    EXPORT LabMidi
+    LIBRARY DESTINATION "${CMAKE_INSTALL_PREFIX}/lib"
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_PREFIX}/lib"
+    RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin"
+    PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_PREFIX}/include")
+
+install(FILES
+  "${PROJECT_BINARY_DIR}/LabMidiConfig.cmake" DESTINATION "${CMAKE_INSTALL_PREFIX}/lib/cmake"
 )
-
-# Install the LabMidiTargets file
-install(EXPORT LabMidiTargets
-        FILE LabMidiTargets.cmake
-        NAMESPACE Lab::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi)
-
-# Create alias target if it doesn't exist
-if(NOT TARGET LabMidi)
-    add_library(LabMidi ALIAS LabMidi)
-endif()
 
 option(LABMIDI_BUILD_EXAMPLES "Build example applications" OFF)
 
@@ -108,6 +104,6 @@ if(LABMIDI_BUILD_EXAMPLES)
 
     # Install examples
     install(TARGETS LabMidiApp LabMidiPlayerApp LabMidiPortsApp
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin"
     )
 endif()
