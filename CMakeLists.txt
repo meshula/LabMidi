@@ -14,7 +14,6 @@ set(CMAKE_CXX_STANDARD 17)
 # Options
 option(LABMIDI_BUILD_EXAMPLES "Build example applications" ON)
 option(LABMIDI_BUILD_SHARED_LIBS "Build shared libraries" OFF)
-option(LABMIDI_INSTALL "Generate installation target" ON)
 option(LABMIDI_USE_RTMIDI6 "Use RtMidi 6" ON)
 
 #-------------------------------------------------
@@ -173,54 +172,52 @@ if(LABMIDI_BUILD_EXAMPLES)
 endif()
 
 # Installation and Export
-if(LABMIDI_INSTALL)
-    include(GNUInstallDirs)
+include(GNUInstallDirs)
 
-    # Install library and headers
-    install(TARGETS liblabmidi
-        EXPORT LabMidiTargets
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+# Install library and headers
+install(TARGETS liblabmidi
+    EXPORT LabMidiTargets
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+install(DIRECTORY include/LabMidi/
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/LabMidi
+    FILES_MATCHING PATTERN "*.h"
+)
+
+# Export targets
+install(EXPORT LabMidiTargets
+    FILE LabMidiTargets.cmake
+    NAMESPACE Lab::
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi
+)
+
+# Config files
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file(
+    ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfigVersion.cmake
+    VERSION ${PROJECT_VERSION}
+    COMPATIBILITY SameMajorVersion
+)
+
+configure_package_config_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/LabMidiConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfig.cmake
+    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfig.cmake
+    ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfigVersion.cmake
+    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi
+)
+
+# Install examples
+if(LABMIDI_BUILD_EXAMPLES)
+    install(TARGETS LabMidiApp LabMidiPlayerApp LabMidiPortsApp
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     )
-
-    install(DIRECTORY include/LabMidi/
-        DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/LabMidi
-        FILES_MATCHING PATTERN "*.h"
-    )
-
-    # Export targets
-    install(EXPORT LabMidiTargets
-        FILE LabMidiTargets.cmake
-        NAMESPACE Lab::
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi
-    )
-
-    # Config files
-    include(CMakePackageConfigHelpers)
-    write_basic_package_version_file(
-        ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfigVersion.cmake
-        VERSION ${PROJECT_VERSION}
-        COMPATIBILITY SameMajorVersion
-    )
-
-    configure_package_config_file(
-        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/LabMidiConfig.cmake.in
-        ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfig.cmake
-        INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi
-    )
-
-    install(FILES
-        ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfig.cmake
-        ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfigVersion.cmake
-        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi
-    )
-
-    # Install examples
-    if(LABMIDI_BUILD_EXAMPLES)
-        install(TARGETS LabMidiApp LabMidiPlayerApp LabMidiPortsApp
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        )
-    endif()
 endif()
