@@ -1,48 +1,30 @@
-@PACKAGE_INIT@
+# FindLabMidiConfig.cmake
+# This is the configuration file for the LabMidi library
 
-include(CMakeFindDependencyMacro)
+# Set the version
+set(LABMIDI_VERSION "${LabMidi_VERSION}")
 
-# Find dependencies based on platform
-if(WIN32)
-    # Windows dependencies handled internally
-elseif(APPLE)
-    # macOS dependencies handled internally
-elseif(UNIX)
-    if(@HAVE_JACK@)
-        find_dependency(PkgConfig)
-        pkg_check_modules(REQUIRED jack)
-    else()
-        find_dependency(ALSA)
-    endif()
-    
-    if(@NEED_PTHREAD@)
-        find_dependency(Threads)
-    endif()
+# Include directories for LabMidi
+if (TARGET LabMidi)
+    set(LabMidi_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/include" CACHE STRING "Include directories for LabMidi")
+else()
+    set(LabMidi_INCLUDE_DIRS "" CACHE STRING "Include directories for LabMidi")
 endif()
 
-# Include the exported targets
-include("${CMAKE_CURRENT_LIST_DIR}/LabMidiTargets.cmake")
-
-# Set platform-specific properties
-if(WIN32)
-    set_property(TARGET liblabmidi APPEND PROPERTY 
-        INTERFACE_COMPILE_DEFINITIONS "__WINDOWS_MM__" "_CRT_SECURE_NO_WARNINGS")
-elseif(APPLE)
-    set_property(TARGET liblabmidi APPEND PROPERTY 
-        INTERFACE_COMPILE_DEFINITIONS "__MACOSX_CORE__")
-elseif(UNIX)
-    if(@HAVE_JACK@)
-        set_property(TARGET liblabmidi APPEND PROPERTY 
-            INTERFACE_COMPILE_DEFINITIONS "__LINUX_JACK__")
-    else()
-        set_property(TARGET liblabmidi APPEND PROPERTY 
-            INTERFACE_COMPILE_DEFINITIONS "__LINUX_ALSASEQ__")
-    endif()
+# Libraries for LabMidi
+if (TARGET LabMidi)
+    set(LabMidi_LIBRARIES LabMidi CACHE STRING "Libraries for LabMidi")
+else()
+    set(LabMidi_LIBRARIES "" CACHE STRING "Libraries for LabMidi")
 endif()
 
-# Create alias target if it doesn't exist
-if(NOT TARGET Lab::Midi)
-    add_library(Lab::Midi ALIAS liblabmidi)
+# Paths to the CMake modules for this package
+set(LabMidi_CMAKE_DIR "${CMAKE_INSTALL_PREFIX}/lib/cmake/LabMidi" CACHE STRING "Path to the CMake configuration directory")
+
+# Export variables for the package
+if (NOT TARGET LabMidi)
+    message(FATAL_ERROR "LabMidi target not found.")
 endif()
 
-check_required_components(LabMidi)
+# mark the package configuration as done
+set(LabMidi_FOUND TRUE)

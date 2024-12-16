@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.15)
 
-# Guard against multiple inclusion
-include_guard()
-
 project(LabMidi
     VERSION 1.0.0
     DESCRIPTION "MIDI library for C++"
@@ -11,23 +8,14 @@ project(LabMidi
 # set c++ to 17
 set(CMAKE_CXX_STANDARD 17)
 
-# Options
-option(LABMIDI_BUILD_EXAMPLES "Build example applications" ON)
-option(LABMIDI_BUILD_SHARED_LIBS "Build shared libraries" OFF)
-option(LABMIDI_USE_RTMIDI6 "Use RtMidi 6" ON)
+option(LABMIDI_USE_RTMIDI6 "Enable RtMidi 6 support" ON)
 
-#-------------------------------------------------
-# Dependencies
-#-------------------------------------------------
-# Find RtMidi
 if(LABMIDI_USE_RTMIDI6)
     find_package(RtMidi 6.0.0 QUIET)
-    # if not found, use FetchContent to download and build it
+
     if (NOT RtMidi_FOUND)
         message(STATUS "RtMidi not found, using FetchContent to download it")
         include(FetchContent)
-
-        # build RtMidi as a static library using the BUILD_SHARED_LIBS=NO option
 
         FetchContent_Declare(
             rtmidi
@@ -36,60 +24,15 @@ if(LABMIDI_USE_RTMIDI6)
         )
 
         set(BUILD_SHARED_LIBS_OLD "${BUILD_SHARED_LIBS}")
-        set(BUILD_SHARED_LIBS "OFF")
+        set(BUILD_SHARED_LIBS OFF)
         FetchContent_MakeAvailable(rtmidi)
         set(BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS_OLD}")
     endif()
-    # verify that RtMidi is now available
+
     if(NOT TARGET rtmidi)
         message(FATAL_ERROR "RtMidi not found")
     endif()
 endif()
-
-# Define library type (static/shared)
-set(LABMIDI_LIB_TYPE STATIC)
-if(LABMIDI_BUILD_SHARED_LIBS)
-    set(LABMIDI_LIB_TYPE SHARED)
-endif()
-
-# Dependencies
-set(LABMIDI_INTERFACE_DEFS)
-set(LABMIDI_PRIVATE_DEFS)
-set(LABMIDI_PUBLIC_LIBS)
-set(LABMIDI_PRIVATE_LIBS)
-set(LABMIDI_PRIVATE_INCLUDES)
-
-if(WIN32)
-    list(APPEND LABMIDI_INTERFACE_DEFS 
-        __WINDOWS_MM__
-        _CRT_SECURE_NO_WARNINGS)
-    list(APPEND LABMIDI_PUBLIC_LIBS winmm)
-elseif(APPLE)
-    list(APPEND LABMIDI_INTERFACE_DEFS __MACOSX_CORE__)
-    list(APPEND LABMIDI_PUBLIC_LIBS 
-        "-framework CoreFoundation" 
-        "-framework CoreMidi" 
-        "-framework CoreAudio" 
-        "-framework AudioToolbox")
-elseif(UNIX)
-    find_library(JACK_LIB jack)
-    find_package(PkgConfig)
-    pkg_check_modules(jack jack)
-    if(JACK_LIB OR jack_FOUND)
-        list(APPEND LABMIDI_INTERFACE_DEFS "__LINUX_JACK__")
-        list(APPEND LABMIDI_PRIVATE_LIBS ${jack_LIBRARIES})
-        list(APPEND LABMIDI_PRIVATE_INCLUDES ${jack_INCLUDEDIR})
-    else()
-        find_package(ALSA REQUIRED)
-        list(APPEND LABMIDI_INTERFACE_DEFS "__LINUX_ALSASEQ__")
-        list(APPEND LABMIDI_PRIVATE_LIBS ${ALSA_LIBRARY})
-        list(APPEND LABMIDI_PRIVATE_INCLUDES ${ALSA_INCLUDE_DIR})
-    endif()
-    find_package(Threads REQUIRED)
-    list(APPEND LABMIDI_PRIVATE_LIBS Threads::Threads)
-endif()
-
-list(APPEND LABMIDI_PRIVATE_DEFS RTMIDI_DO_NOT_ENSURE_UNIQUE_PORTNAMES)
 
 # Sources and Headers
 set(LABMIDI_HEADERS
@@ -114,68 +57,21 @@ set(LABMIDI_SOURCES
     src/LabMidiUtil.cpp
 )
 
-if(NOT LABMIDI_USE_RTMIDI6)
-    set(RTMIDI_SOURCES
-        third-party/rtmidi-1.0.15/RtMidi.cpp
-        third-party/rtmidi-1.0.15/RtMidi.h
-    )
-endif()
+# Build the library
+add_library(LabMidi ${LABMIDI_SOURCES} ${LABMIDI_HEADERS})
+target_include_directories(LabMidi PUBLIC include)
+target_link_libraries(LabMidi PRIVATE rtmidi)
+add_library(Lab::Midi ALIAS LabMidi)
 
-# Core Library
-add_library(liblabmidi ${LABMIDI_LIB_TYPE} 
-    ${LABMIDI_HEADERS} 
-    ${LABMIDI_SOURCES} 
-    ${RTMIDI_SOURCES}
+# Create configuration file for CMake package config
+configure_package_config_file(
+    "${CMAKE_CURRENT_LIST_DIR}/cmake/LabMidiConfig.cmake.in"
+    "${CMAKE_BINARY_DIR}/LabMidiConfig.cmake"
+    INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi"
 )
 
-add_library(Lab::Midi ALIAS liblabmidi)
-
-target_include_directories(liblabmidi
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
-    PRIVATE
-        ${LABMIDI_PRIVATE_INCLUDES}
-)
-
-target_compile_definitions(liblabmidi
-    PUBLIC ${LABMIDI_INTERFACE_DEFS}
-    PRIVATE ${LABMIDI_PRIVATE_DEFS}
-)
-
-target_link_libraries(liblabmidi
-    PUBLIC ${LABMIDI_PUBLIC_LIBS}
-    PRIVATE ${LABMIDI_PRIVATE_LIBS}
-)
-
-if (LABMIDI_USE_RTMIDI6)
-    target_link_libraries(liblabmidi PRIVATE rtmidi)
-endif()
-
-set_target_properties(liblabmidi PROPERTIES
-    OUTPUT_NAME labmidi
-    VERSION ${PROJECT_VERSION}
-    SOVERSION ${PROJECT_VERSION_MAJOR}
-    POSITION_INDEPENDENT_CODE ON
-)
-
-# Examples
-if(LABMIDI_BUILD_EXAMPLES)
-    add_executable(LabMidiApp examples/MidiApp.cpp)
-    target_link_libraries(LabMidiApp PRIVATE Lab::Midi)
-
-    add_executable(LabMidiPlayerApp examples/MidiPlayerApp.cpp examples/OptionParser.cpp)
-    target_link_libraries(LabMidiPlayerApp PRIVATE Lab::Midi)
-
-    add_executable(LabMidiPortsApp examples/MidiPortsApp.cpp examples/OptionParser.cpp)
-    target_link_libraries(LabMidiPortsApp PRIVATE Lab::Midi)
-endif()
-
-# Installation and Export
-include(GNUInstallDirs)
-
-# Install library and headers
-install(TARGETS liblabmidi
+# Install the library
+install(TARGETS LabMidi
     EXPORT LabMidiTargets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -183,40 +79,28 @@ install(TARGETS liblabmidi
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-install(DIRECTORY include/LabMidi/
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/LabMidi
-    FILES_MATCHING PATTERN "*.h"
-)
+# Install package config file
+install(FILES "${CMAKE_BINARY_DIR}/LabMidiConfig.cmake"
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi)
 
-# Export targets
-install(EXPORT LabMidiTargets
-    FILE LabMidiTargets.cmake
-    NAMESPACE Lab::
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi
-)
+# Create alias target if it doesn't exist
+if(NOT TARGET LabMidi)
+    add_library(LabMidi ALIAS LabMidi)
+endif()
 
-# Config files
-include(CMakePackageConfigHelpers)
-write_basic_package_version_file(
-    ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfigVersion.cmake
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion
-)
+option(LABMIDI_BUILD_EXAMPLES "Build example applications" OFF)
 
-configure_package_config_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/cmake/LabMidiConfig.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfig.cmake
-    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi
-)
-
-install(FILES
-    ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfig.cmake
-    ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfigVersion.cmake
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi
-)
-
-# Install examples
 if(LABMIDI_BUILD_EXAMPLES)
+    add_executable(LabMidiApp examples/MidiApp.cpp)
+    target_link_libraries(LabMidiApp PRIVATE LabMidi)
+
+    add_executable(LabMidiPlayerApp examples/MidiPlayerApp.cpp examples/OptionParser.cpp)
+    target_link_libraries(LabMidiPlayerApp PRIVATE LabMidi)
+
+    add_executable(LabMidiPortsApp examples/MidiPortsApp.cpp examples/OptionParser.cpp)
+    target_link_libraries(LabMidiPortsApp PRIVATE LabMidi)
+
+    # Install examples
     install(TARGETS LabMidiApp LabMidiPlayerApp LabMidiPortsApp
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
     )
