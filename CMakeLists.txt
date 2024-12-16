@@ -70,6 +70,10 @@ configure_package_config_file(
     INSTALL_DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi"
 )
 
+# Install package config file
+install(FILES "${CMAKE_BINARY_DIR}/LabMidiConfig.cmake"
+        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi)
+
 # Install the library
 install(TARGETS LabMidi
     EXPORT LabMidiTargets
@@ -79,8 +83,10 @@ install(TARGETS LabMidi
     INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
-# Install package config file
-install(FILES "${CMAKE_BINARY_DIR}/LabMidiConfig.cmake"
+# Install the LabMidiTargets file
+install(EXPORT LabMidiTargets
+        FILE LabMidiTargets.cmake
+        NAMESPACE Lab::
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi)
 
 # Create alias target if it doesn't exist
