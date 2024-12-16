@@ -44,7 +44,7 @@ namespace Lab {
             try {
                 midiOut = new RtMidiOut();
             }
-            catch(RtError& error) {
+            catch(RtMidiError& error) {
                 midiOut = 0;
                 error.printMessage();
             }        
@@ -72,7 +72,7 @@ namespace Lab {
                 midiOut->openPort(p, "MidiOut");
                 port = p;
             }
-            catch(RtError& rterr) {
+            catch(RtMidiError& rterr) {
                 port = -1;
                 rterr.printMessage();
             }
@@ -104,7 +104,7 @@ namespace Lab {
         try {
             _detail->midiOut->openVirtualPort(_port);
         }
-        catch(const RtError&) {
+        catch(const RtMidiError&) {
             return false;
         }
         return true;

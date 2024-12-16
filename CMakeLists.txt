@@ -15,6 +15,37 @@ set(CMAKE_CXX_STANDARD 17)
 option(LABMIDI_BUILD_EXAMPLES "Build example applications" ON)
 option(LABMIDI_BUILD_SHARED_LIBS "Build shared libraries" OFF)
 option(LABMIDI_INSTALL "Generate installation target" ON)
+option(LABMIDI_USE_RTMIDI6 "Use RtMidi 6" ON)
+
+#-------------------------------------------------
+# Dependencies
+#-------------------------------------------------
+# Find RtMidi
+if(LABMIDI_USE_RTMIDI6)
+    find_package(RtMidi 6.0.0 QUIET)
+    # if not found, use FetchContent to download and build it
+    if (NOT RtMidi_FOUND)
+        message(STATUS "RtMidi not found, using FetchContent to download it")
+        include(FetchContent)
+
+        # build RtMidi as a static library using the BUILD_SHARED_LIBS=NO option
+
+        FetchContent_Declare(
+            rtmidi
+            GIT_REPOSITORY https://github.com/thestk/rtmidi.git
+            GIT_TAG 6.0.0
+        )
+
+        set(BUILD_SHARED_LIBS_OLD "${BUILD_SHARED_LIBS}")
+        set(BUILD_SHARED_LIBS "OFF")
+        FetchContent_MakeAvailable(rtmidi)
+        set(BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS_OLD}")
+    endif()
+    # verify that RtMidi is now available
+    if(NOT TARGET rtmidi)
+        message(FATAL_ERROR "RtMidi not found")
+    endif()
+endif()
 
 # Define library type (static/shared)
 set(LABMIDI_LIB_TYPE STATIC)
@@ -84,10 +115,12 @@ set(LABMIDI_SOURCES
     src/LabMidiUtil.cpp
 )
 
-set(RTMIDI_SOURCES
-    third-party/rtmidi-1.0.15/RtMidi.cpp
-    third-party/rtmidi-1.0.15/RtMidi.h
-)
+if(NOT LABMIDI_USE_RTMIDI6)
+    set(RTMIDI_SOURCES
+        third-party/rtmidi-1.0.15/RtMidi.cpp
+        third-party/rtmidi-1.0.15/RtMidi.h
+    )
+endif()
 
 # Core Library
 add_library(liblabmidi ${LABMIDI_LIB_TYPE} 
@@ -115,6 +148,10 @@ target_link_libraries(liblabmidi
     PUBLIC ${LABMIDI_PUBLIC_LIBS}
     PRIVATE ${LABMIDI_PRIVATE_LIBS}
 )
+
+if (LABMIDI_USE_RTMIDI6)
+    target_link_libraries(liblabmidi PRIVATE rtmidi)
+endif()
 
 set_target_properties(liblabmidi PROPERTIES
     OUTPUT_NAME labmidi
@@ -179,4 +216,11 @@ if(LABMIDI_INSTALL)
         ${CMAKE_CURRENT_BINARY_DIR}/LabMidiConfigVersion.cmake
         DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/LabMidi
     )
+
+    # Install examples
+    if(LABMIDI_BUILD_EXAMPLES)
+        install(TARGETS LabMidiApp LabMidiPlayerApp LabMidiPortsApp
+            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+        )
+    endif()
 endif()

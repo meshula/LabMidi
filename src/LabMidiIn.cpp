@@ -46,7 +46,7 @@ namespace Lab {
             try {
                 midiIn = new RtMidiIn();
             }
-            catch (RtError& rterr) {
+            catch (RtMidiError& rterr) {
                 midiIn = 0;
                 rterr.printMessage();
             }
@@ -76,7 +76,7 @@ namespace Lab {
                 midiIn->ignoreTypes(false, false, false);
                 port = port;
             }
-            catch(RtError& rterr) {
+            catch(RtMidiError& rterr) {
                 port = -1;
                 rterr.printMessage();
             }
@@ -96,7 +96,7 @@ namespace Lab {
                 midiIn->openVirtualPort(port);
                 midiIn->setCallback(&midiInCallback, this);
             }
-            catch(const RtError&) {
+            catch(const RtMidiError&) {
                 return false;
             }
             return true;
