@@ -17,7 +17,7 @@ if(LABMIDI_USE_RTMIDI6)
     find_package(RtMidi 6.0.0 QUIET)
 
     if (NOT RtMidi_FOUND)
-        message(STATUS "RtMidi not found, using FetchContent to download it")
+        message(STATUS "Using FetchContent to manage RtMidi")
         include(FetchContent)
 
         FetchContent_Declare(
