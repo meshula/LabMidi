@@ -333,9 +333,9 @@ int main(int argc, char** argv)
 
     while (app->running()) {
 #ifdef _MSC_VER
-        Sleep(1); // 1ms delay --- to do - shouldn't sleep this long
+//        Sleep(1); // 1ms delay --- to do - shouldn't sleep this long
 #else
-        usleep(100); // 0.1ms delay
+//        usleep(100); // 0.1ms delay
 #endif
         app->update();
     }

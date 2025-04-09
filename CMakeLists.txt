@@ -10,7 +10,6 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(LABMIDI_ROOT ${CMAKE_CURRENT_SOURCE_DIR})
 
-
 option(LABMIDI_USE_RTMIDI6 "Enable RtMidi 6 support" ON)
 
 if(LABMIDI_USE_RTMIDI6)
@@ -106,4 +105,17 @@ if(LABMIDI_BUILD_EXAMPLES)
     install(TARGETS LabMidiApp LabMidiPlayerApp LabMidiPortsApp
         RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin"
     )
+    #------------------------------------------------------------------------------
+    # example Echo
+
+    set(echo_src "${LABMIDI_ROOT}/examples/Echo.cpp"
+                 "${LABMIDI_ROOT}/examples/OptionParser.h"
+                 "${LABMIDI_ROOT}/examples/OptionParser.cpp")
+    add_executable(Echo ${echo_src})
+    target_link_libraries(Echo Lab::Midi)
+    target_include_directories(Echo PRIVATE ${LABMIDI_ROOT}/include)
+    _set_compile_options(Echo)
+    set_property(TARGET Echo PROPERTY CXX_STANDARD 14)
+    set_property(TARGET Echo PROPERTY FOLDER "examples")
 endif()
+
