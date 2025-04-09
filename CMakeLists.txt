@@ -150,4 +150,15 @@ _set_compile_options(LabMidiPortsApp)
 set_property(TARGET LabMidiPortsApp PROPERTY CXX_STANDARD 14)
 set_property(TARGET LabMidiPortsApp PROPERTY FOLDER "examples")
 
+#------------------------------------------------------------------------------
+# example Echo
 
+set(echo_src "${LABMIDI_ROOT}/examples/Echo.cpp"
+             "${LABMIDI_ROOT}/examples/OptionParser.h"
+             "${LABMIDI_ROOT}/examples/OptionParser.cpp")
+add_executable(Echo ${echo_src})
+target_link_libraries(Echo Lab::Midi)
+target_include_directories(Echo PRIVATE ${LABMIDI_ROOT}/include)
+_set_compile_options(Echo)
+set_property(TARGET Echo PROPERTY CXX_STANDARD 14)
+set_property(TARGET Echo PROPERTY FOLDER "examples")
