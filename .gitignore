@@ -3,6 +3,9 @@
 *.lo
 *.o
 
+.DS_Store
+
+
 # Compiled Dynamic libraries
 *.so
 *.dylib
