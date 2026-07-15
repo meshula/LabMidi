@@ -2,6 +2,19 @@
 
 by Nick Porcino
 
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│ ▓▓▓▒▒▒ PROVENANCE NODE [2] // ZONE: [HMN_REMIXABLE]                      │
+├──────────────────────────────────────────────────────────────────────────┤
+│ AUTH_ID  : [Nick Porcino]         │ GEN_TOOL : [NONE]                    │
+│ SRC_AUTH : [HMN]                  │ SIG_STAT : [UNSIGNED]                │
+│ INCEPT © : [May 3 2025 -0800]     │                                      │
+├──────────────────────────────────────────────────────────────────────────┤
+│ INDEX_ALLOW : [YES]               │ CORP_TRAIN: [NO]                     │
+│ DERIV_ALLOW : [YES]               │ GOV_SPDX  : [SPDX: BSD 2-Clause]     │
+└──────────────────────────────────────────────────────────────────────────┘
+ ```
+ 
 - [Understanding LucasArts' iMUSE System: A Historical and Technical Analysis](#understanding-lucasarts-imuse-system-a-historical-and-technical-analysis)
   - [Introduction](#introduction)
     - [About the author](#about-the-author)

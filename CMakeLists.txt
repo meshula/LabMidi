@@ -66,6 +66,19 @@ target_include_directories(LabMidi PUBLIC include)
 target_link_libraries(LabMidi PRIVATE rtmidi)
 add_library(Lab::Midi ALIAS LabMidi)
 
+# On Apple platforms the built-in DLS software synthesizer (LabMidiSoftSynth.cpp)
+# is guarded by __MACOSX_CORE__ and depends on the CoreAudio framework family.
+# Without these, the synth silently compiles to an empty stub and nothing plays.
+if(APPLE)
+    target_compile_definitions(LabMidi PRIVATE __MACOSX_CORE__)
+    target_link_libraries(LabMidi PRIVATE
+        "-framework AudioToolbox"
+        "-framework CoreAudio"
+        "-framework CoreMIDI"
+        "-framework CoreFoundation"
+        "-framework CoreServices")
+endif()
+
 set_target_properties(
     LabMidi
     PROPERTIES
@@ -104,6 +117,44 @@ if(LABMIDI_BUILD_EXAMPLES)
 
     # Install examples
     install(TARGETS LabMidiApp LabMidiPlayerApp LabMidiPortsApp
+        RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin"
+    )
+endif()
+
+#-----------------------------------------------------------------------------
+# LabMuse : a scoped, faithful iMUSE interactive-music engine built on LabMidi
+#-----------------------------------------------------------------------------
+
+set(LABMUSE_HEADERS
+    LabMuse/include/LabMuse/LabMuse.h
+)
+
+set(LABMUSE_SOURCES
+    LabMuse/src/LabMuseEngine.cpp
+    LabMuse/src/LabMuseSequencer.cpp
+)
+
+add_library(LabMuse ${LABMUSE_SOURCES} ${LABMUSE_HEADERS} LabMuse/src/LabMuseInternal.h)
+target_include_directories(LabMuse PUBLIC LabMuse/include)
+target_link_libraries(LabMuse PUBLIC LabMidi)
+add_library(Lab::Muse ALIAS LabMuse)
+
+set_target_properties(LabMuse PROPERTIES
+    FOLDER "LabMuse"
+    POSITION_INDEPENDENT_CODE ON
+    OUTPUT_NAME "LabMuse"
+    OUTPUT_NAME_DEBUG "LabMuse_d")
+
+option(LABMUSE_BUILD_EXAMPLES "Build LabMuse example applications" ON)
+
+if(LABMUSE_BUILD_EXAMPLES)
+    add_executable(DieToteninsel
+        LabMuse/examples/DieToteninsel.cpp
+        LabMuse/examples/LabMuseComposition.cpp)
+    target_link_libraries(DieToteninsel PRIVATE LabMuse)
+    set_target_properties(DieToteninsel PROPERTIES FOLDER "LabMuse")
+
+    install(TARGETS DieToteninsel
         RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}/bin"
     )
 endif()
